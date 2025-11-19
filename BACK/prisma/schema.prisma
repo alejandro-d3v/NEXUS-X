@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum ActivityType {
+  EXAM
+  QUIZ
+  SUMMARY
+  PRESENTATION
+  EMAIL
+  SURVEY
+  RUBRIC
+  LESSON_PLAN
+  GAME
+  CHATBOT
+  WRITING_CORRECTION
+}
+
+enum ActivityVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+enum AIProvider {
+  OPENAI
+  GEMINI
+  OLLAMA
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String
+  firstName     String
+  lastName      String
+  role          UserRole  @default(TEACHER)
+  credits       Int       @default(500)
+  subject       String?
+  grade         String?
+  institution   String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  activities    Activity[]
+  creditHistory CreditHistory[]
+  
+  @@index([email])
+  @@index([role])
+}
+
+model Activity {
+  id          String              @id @default(uuid())
+  title       String
+  description String?
+  type        ActivityType
+  visibility  ActivityVisibility  @default(PRIVATE)
+  content     Json
+  subject     String
+  grade       String
+  aiProvider  AIProvider
+  creditCost  Int
+  userId      String
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  
+  @@index([userId])
+  @@index([type])
+  @@index([visibility])
+  @@index([subject])
+  @@index([createdAt])
+}
+
+model CreditHistory {
+  id          String      @id @default(uuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount      Int
+  type        String
+  description String
+  aiProvider  AIProvider?
+  createdAt   DateTime    @default(now())
+  
+  @@index([userId])
+  @@index([createdAt])
+}

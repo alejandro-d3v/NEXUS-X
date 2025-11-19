@@ -1,0 +1,61 @@
+import Joi from 'joi';
+
+export const registerSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().min(6).required(),
+  firstName: Joi.string().required(),
+  lastName: Joi.string().required(),
+  role: Joi.string().valid('ADMIN', 'TEACHER', 'STUDENT').optional(),
+  subject: Joi.string().optional(),
+  grade: Joi.string().optional(),
+  institution: Joi.string().optional(),
+});
+
+export const loginSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().required(),
+});
+
+export const generateActivitySchema = Joi.object({
+  prompt: Joi.string().required(),
+  provider: Joi.string().valid('OPENAI', 'GEMINI', 'OLLAMA').required(),
+  type: Joi.string().valid(
+    'EXAM',
+    'QUIZ',
+    'SUMMARY',
+    'PRESENTATION',
+    'EMAIL',
+    'SURVEY',
+    'RUBRIC',
+    'LESSON_PLAN',
+    'GAME',
+    'CHATBOT',
+    'WRITING_CORRECTION'
+  ).required(),
+  subject: Joi.string().required(),
+  grade: Joi.string().required(),
+  title: Joi.string().optional(),
+  description: Joi.string().optional(),
+  visibility: Joi.string().valid('PRIVATE', 'PUBLIC').optional(),
+});
+
+export const updateActivitySchema = Joi.object({
+  title: Joi.string().optional(),
+  description: Joi.string().optional(),
+  visibility: Joi.string().valid('PRIVATE', 'PUBLIC').optional(),
+});
+
+export const addCreditsSchema = Joi.object({
+  userId: Joi.string().required(),
+  amount: Joi.number().positive().required(),
+  description: Joi.string().required(),
+});
+
+export const updateUserSchema = Joi.object({
+  firstName: Joi.string().optional(),
+  lastName: Joi.string().optional(),
+  subject: Joi.string().optional(),
+  grade: Joi.string().optional(),
+  institution: Joi.string().optional(),
+  isActive: Joi.boolean().optional(),
+});

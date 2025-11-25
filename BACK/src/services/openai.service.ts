@@ -9,6 +9,7 @@ class OpenAIService {
 
   constructor() {
     this.client = new OpenAI({
+      baseURL: 'https://routellm.abacus.ai/v1',
       apiKey: config.ai.openai.apiKey,
     });
   }
@@ -18,12 +19,12 @@ class OpenAIService {
       const systemPrompt = this.getSystemPrompt(request.type);
       
       const completion = await this.client.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
+        model: 'gpt-5-nano',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: request.prompt },
         ],
-        temperature: 0.7,
+        temperature: 0.2,
         response_format: { type: 'json_object' },
       });
 

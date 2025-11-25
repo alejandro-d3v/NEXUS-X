@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "titulo": "",
+    "descripcion": "",
+    "materia": "",
+    "nivel_educativo": "",
+    "idioma": "",
+    "duracion_min": 0,
+    "dificultad": "",
+    "cantidad_preguntas": 0,
+    "cantidad_opcion_multiple": 0,
+    "cantidad_verdadero_falso": 0
+  },
+  "preguntas": [
+    {
+      "id": 1,
+      "tipo": "opcion_multiple",
+      "enunciado": "",
+      "opciones": ["", "", "", ""],
+      "respuesta_correcta": 0
+    },
+    {
+      "id": 2,
+      "tipo": "verdadero_falso",
+      "enunciado": "",
+      "respuesta_correcta": true
+    }
+  ]
+}

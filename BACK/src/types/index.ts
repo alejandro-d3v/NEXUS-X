@@ -83,7 +83,21 @@ export interface AIGenerationRequest {
   type: ActivityType;
   subject: string;
   grade: string;
-  additionalParams?: Record<string, any>;
+  additionalParams?: ExamParams | Record<string, any>;
+}
+
+export interface ExamParams {
+  titulo?: string;
+  descripcion?: string;
+  materia?: string;
+  nivelEducativo?: string;
+  idioma?: string;
+  duracion?: number;
+  dificultad?: string;
+  cantidadPreguntas?: number;
+  cantidadOM?: number;
+  cantidadVF?: number;
+  instruccionesAdicionales?: string;
 }
 
 export interface AIGenerationResponse {

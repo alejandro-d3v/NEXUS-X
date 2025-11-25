@@ -37,6 +37,19 @@ export const generateActivitySchema = Joi.object({
   title: Joi.string().optional(),
   description: Joi.string().optional(),
   visibility: Joi.string().valid('PRIVATE', 'PUBLIC').optional(),
+  additionalParams: Joi.object({
+    titulo: Joi.string().optional(),
+    descripcion: Joi.string().optional(),
+    materia: Joi.string().optional(),
+    nivelEducativo: Joi.string().optional(),
+    idioma: Joi.string().optional(),
+    duracion: Joi.number().optional(),
+    dificultad: Joi.string().optional(),
+    cantidadPreguntas: Joi.number().optional(),
+    cantidadOM: Joi.number().optional(),
+    cantidadVF: Joi.number().optional(),
+    instruccionesAdicionales: Joi.string().optional(),
+  }).optional(),
 });
 
 export const updateActivitySchema = Joi.object({

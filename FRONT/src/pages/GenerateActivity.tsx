@@ -13,37 +13,81 @@ export const GenerateActivity: React.FC = () => {
     description: '',
     type: (searchParams.get('type') as ActivityType) || ActivityType.EXAM,
     visibility: ActivityVisibility.PRIVATE,
-    provider: AIProvider.GEMINI,              // 🔧 Renombrado
+    provider: AIProvider.GEMINI,
     prompt: '',
     subject: '',
-    grade: '',                                // 🔧 Renombrado
-    // Campos opcionales NO enviados al backend
+    grade: '',
+    // Campos específicos para exámenes
     duration: '',
     difficulty: '',
     language: 'Español',
     additionalInstructions: '',
+    cantidadPreguntas: 10,
+    cantidadOM: 5,
+    cantidadVF: 5,
   });
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [validationError, setValidationError] = useState('');
+
+  // Validación para exámenes: OM + VF = Total
+  const validateExamQuestions = () => {
+    if (formData.type === ActivityType.EXAM) {
+      const total = Number(formData.cantidadPreguntas);
+      const om = Number(formData.cantidadOM);
+      const vf = Number(formData.cantidadVF);
+      
+      if (om + vf !== total) {
+        setValidationError(`La suma de preguntas OM (${om}) y VF (${vf}) debe ser igual al total (${total})`);
+        return false;
+      }
+      setValidationError('');
+      return true;
+    }
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    // Validar preguntas de examen antes de enviar
+    if (!validateExamQuestions()) {
+      return;
+    }
+    
     setLoading(true);
 
     try {
-      // 🔧 Preparamos SOLO el payload permitido por el backend
-      const payload = {
+      // Payload base
+      const payload: any = {
         title: formData.title,
         description: formData.description,
         type: formData.type,
         visibility: formData.visibility,
-        provider: formData.provider,       // ✔️ nombre correcto
+        provider: formData.provider,
         prompt: formData.prompt,
         subject: formData.subject,
-        grade: formData.grade,             // ✔️ nombre correcto
+        grade: formData.grade,
       };
+
+      // Agregar parámetros adicionales para exámenes
+      if (formData.type === ActivityType.EXAM) {
+        payload.additionalParams = {
+          titulo: formData.title,
+          descripcion: formData.description,
+          materia: formData.subject,
+          nivelEducativo: formData.grade,
+          idioma: formData.language,
+          duracion: Number(formData.duration) || 60,
+          dificultad: formData.difficulty,
+          cantidadPreguntas: Number(formData.cantidadPreguntas),
+          cantidadOM: Number(formData.cantidadOM),
+          cantidadVF: Number(formData.cantidadVF),
+          instruccionesAdicionales: formData.additionalInstructions,
+        };
+      }
 
       const activity = await activityService.generateActivity(payload as any);
       navigate(`/activity/${activity.id}`);
@@ -63,6 +107,12 @@ export const GenerateActivity: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    
+    // Validar en tiempo real si es campo de examen
+    if (formData.type === ActivityType.EXAM && 
+        ['cantidadPreguntas', 'cantidadOM', 'cantidadVF'].includes(e.target.name)) {
+      setTimeout(validateExamQuestions, 100);
+    }
   };
 
   return (
@@ -225,6 +275,65 @@ export const GenerateActivity: React.FC = () => {
             </div>
           </div>
 
+          {/* Campos específicos para EXÁMENES */}
+          {formData.type === ActivityType.EXAM && (
+            <>
+              <div style={styles.examHeader}>
+                <h3>Configuración de Preguntas</h3>
+              </div>
+
+              <div style={styles.row}>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Total de Preguntas *</label>
+                  <input
+                    type="number"
+                    name="cantidadPreguntas"
+                    value={formData.cantidadPreguntas}
+                    onChange={handleChange}
+                    min="1"
+                    max="100"
+                    required
+                    style={styles.input}
+                  />
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Preguntas de Opción Múltiple *</label>
+                  <input
+                    type="number"
+                    name="cantidadOM"
+                    value={formData.cantidadOM}
+                    onChange={handleChange}
+                    min="0"
+                    max="100"
+                    required
+                    style={styles.input}
+                  />
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Preguntas de Verdadero/Falso *</label>
+                  <input
+                    type="number"
+                    name="cantidadVF"
+                    value={formData.cantidadVF}
+                    onChange={handleChange}
+                    min="0"
+                    max="100"
+                    required
+                    style={styles.input}
+                  />
+                </div>
+              </div>
+
+              {validationError && (
+                <div style={styles.validationError}>
+                  ⚠️ {validationError}
+                </div>
+              )}
+            </>
+          )}
+
           <div style={styles.formGroup}>
             <label style={styles.label}>Instrucciones Adicionales</label>
             <textarea
@@ -236,7 +345,7 @@ export const GenerateActivity: React.FC = () => {
             />
           </div>
 
-          <button type="submit" disabled={loading} style={styles.button}>
+          <button type="submit" disabled={loading || !!validationError} style={styles.button}>
             {loading ? 'Generando...' : 'Generar Actividad'}
           </button>
         </form>
@@ -304,5 +413,19 @@ const styles = {
     padding: '0.75rem',
     borderRadius: '4px',
     marginBottom: '1rem',
+  },
+  examHeader: {
+    marginTop: '1.5rem',
+    marginBottom: '1rem',
+    paddingBottom: '0.5rem',
+    borderBottom: '2px solid #1a1a2e',
+  },
+  validationError: {
+    backgroundColor: '#fff3cd',
+    color: '#856404',
+    padding: '0.75rem',
+    borderRadius: '4px',
+    marginTop: '0.5rem',
+    border: '1px solid #ffc107',
   },
 };

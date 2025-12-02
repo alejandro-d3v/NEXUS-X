@@ -8,6 +8,7 @@ import { Dashboard } from './pages/Dashboard';
 import { GenerateActivity } from './pages/GenerateActivity';
 import { GenerateExam } from './pages/GenerateExam';
 import { GenerateSummary } from './pages/GenerateSummary';
+import { GenerateRubric } from './pages/GenerateRubric';
 import { MyActivities } from './pages/MyActivities';
 import { PublicActivities } from './pages/PublicActivities';
 import { ActivityDetail } from './pages/ActivityDetail';
@@ -48,6 +49,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <GenerateSummary />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/generate-rubric"
+            element={
+              <ProtectedRoute>
+                <GenerateRubric />
               </ProtectedRoute>
             }
           />

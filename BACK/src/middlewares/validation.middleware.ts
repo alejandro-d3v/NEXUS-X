@@ -3,6 +3,15 @@ import Joi from 'joi';
 
 export const validate = (schema: Joi.ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
+    // Parse additionalParams if it's a JSON string (from FormData)
+    if (req.body.additionalParams && typeof req.body.additionalParams === 'string') {
+      try {
+        req.body.additionalParams = JSON.parse(req.body.additionalParams);
+      } catch (e) {
+        // If parsing fails, leave it as is and let validation handle it
+      }
+    }
+
     const { error } = schema.validate(req.body, { abortEarly: false });
 
     if (error) {

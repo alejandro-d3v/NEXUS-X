@@ -17,7 +17,6 @@ export const Dashboard: React.FC = () => {
     { type: ActivityType.PRESENTATION, name: 'Presentaciones', icon: '📊', description: 'Crea presentaciones' },
     { type: ActivityType.WORKSHEET, name: 'Hojas de Trabajo', icon: '📋', description: 'Genera ejercicios' },
     { type: ActivityType.PROJECT, name: 'Proyectos', icon: '🎯', description: 'Planifica proyectos' },
-    { type: ActivityType.RUBRIC, name: 'Rúbricas', icon: '📏', description: 'Crea rúbricas de evaluación' },
   ];
 
   return (
@@ -61,8 +60,18 @@ export const Dashboard: React.FC = () => {
             <p style={styles.toolDescription}>Resume textos largos o PDFs</p>
           </Link>
 
+          {/* Rubric Generator - Special Link */}
+          <Link
+            to="/generate-rubric"
+            style={styles.toolCard}
+          >
+            <div style={styles.toolIcon}>📊</div>
+            <h3 style={styles.toolName}>Generador de Rúbricas</h3>
+            <p style={styles.toolDescription}>Crea rúbricas de evaluación</p>
+          </Link>
+
           {/* Other tools */}
-          {tools.slice(2).map((tool) => (
+          {tools.slice(3).map((tool) => (
             <Link
               key={tool.type}
               to={`/generate?type=${tool.type}`}

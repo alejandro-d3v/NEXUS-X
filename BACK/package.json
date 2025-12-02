@@ -38,6 +38,7 @@
     "morgan": "^1.10.0",
     "multer": "^2.0.2",
     "openai": "^4.24.1",
+    "pdf-parse": "^2.4.5",
     "winston": "^3.11.0"
   },
   "devDependencies": {

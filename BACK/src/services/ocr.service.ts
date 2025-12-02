@@ -1,4 +1,3 @@
-import pdf from 'pdf-parse';
 import fs from 'fs';
 import logger from '../config/logger';
 
@@ -11,22 +10,25 @@ class OCRService {
   async extractTextFromPDF(filePath: string): Promise<string> {
     try {
       logger.info(`Starting PDF text extraction from: ${filePath}`);
-      
+
       // Leer el archivo PDF
       const dataBuffer = fs.readFileSync(filePath);
-      
+
+      // Importar dinámicamente pdf-parse (CommonJS module)
+      const { default: pdfParse } = await import('pdf-parse');
+
       // Extraer texto usando pdf-parse
-      const data = await pdf(dataBuffer);
-      
+      const data = await (pdfParse as any)(dataBuffer);
+
       // Limpiar y formatear el texto
       const cleanedText = this.cleanText(data.text);
-      
+
       logger.info(`PDF text extraction successful. Characters extracted: ${cleanedText.length}`);
-      
+
       if (cleanedText.length === 0) {
         throw new Error('El PDF no contiene texto extraíble. Asegúrate de que no sea un PDF escaneado.');
       }
-      
+
       return cleanedText;
     } catch (error) {
       logger.error('Error extracting text from PDF:', error);
@@ -57,8 +59,11 @@ class OCRService {
   async getPDFInfo(filePath: string): Promise<{ pages: number; info: any }> {
     try {
       const dataBuffer = fs.readFileSync(filePath);
-      const data = await pdf(dataBuffer);
-      
+
+      // Importar dinámicamente pdf-parse (CommonJS module)
+      const { default: pdfParse } = await import('pdf-parse');
+      const data = await (pdfParse as any)(dataBuffer);
+
       return {
         pages: data.numpages,
         info: data.info,

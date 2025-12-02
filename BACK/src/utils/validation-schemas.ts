@@ -35,7 +35,7 @@ export const generateActivitySchema = Joi.object({
   subject: Joi.string().optional().allow(''),
   grade: Joi.string().optional().allow(''),
   title: Joi.string().optional(),
-  description: Joi.string().optional(),
+  description: Joi.string().optional().allow(''),
   visibility: Joi.string().valid('PRIVATE', 'PUBLIC').optional(),
   additionalParams: Joi.object({
     titulo: Joi.string().optional(),
@@ -49,6 +49,13 @@ export const generateActivitySchema = Joi.object({
     cantidadOM: Joi.number().optional(),
     cantidadVF: Joi.number().optional(),
     instruccionesAdicionales: Joi.string().optional(),
+    // Summary-specific fields
+    longitud: Joi.string().optional(),
+    enfoque: Joi.string().optional(),
+    // Rubric-specific fields
+    numeroCriterios: Joi.number().optional(),
+    numeroNiveles: Joi.number().optional(),
+    puntajeMaximo: Joi.number().optional(),
   }).optional(),
 });
 

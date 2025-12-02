@@ -86,6 +86,8 @@ export const GenerateSummary: React.FC = () => {
             }
 
             console.log('✅ Resumen generado:', activity);
+            console.log('📄 Contenido tipo:', typeof activity.content);
+            console.log('📄 Contenido:', activity.content);
             setGeneratedSummary(activity);
         } catch (err: any) {
             console.error('❌ Error:', err);
@@ -120,17 +122,87 @@ export const GenerateSummary: React.FC = () => {
         }
     };
 
-    const convertSummaryToHTML = (content: string): string => {
-        // Si el contenido ya parece HTML, devolverlo
-        if (content.trim().startsWith('<')) return content;
+    const convertSummaryToHTML = (content: any): string => {
+        // Si ya es string HTML, devolverlo
+        if (typeof content === 'string' && content.trim().startsWith('<')) {
+            return content;
+        }
 
-        // Convertir markdown básico a HTML
-        return content
-            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-            .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-            .replace(/\n/gim, '<br>');
+        // Si es un objeto JSON (estructura del resumen), convertirlo a HTML bonito
+        if (typeof content === 'object' && content !== null) {
+            let html = '<div style="font-family: Arial, sans-serif; line-height: 1.8;">';
+
+            // Título y metadata si existen
+            if (content.titulo || content.nivel || content.enfoque) {
+                html += '<div style="margin-bottom: 2rem; padding: 1rem; background-color: #f5f5f5; border-radius: 8px;">';
+                if (content.titulo) html += `<h2 style="margin: 0.5rem 0; color: #1a1a2e;">${content.titulo}</h2>`;
+                if (content.nivel) html += `<p style="margin: 0.3rem 0;"><strong>Nivel:</strong> ${content.nivel}</p>`;
+                if (content.enfoque) html += `<p style="margin: 0.3rem 0;"><strong>Enfoque:</strong> ${content.enfoque}</p>`;
+                html += '</div>';
+            }
+
+            // Resumen principal
+            if (content.resumen) {
+                html += '<div style="margin-bottom: 2rem;">';
+                html += '<h3 style="color: #1a1a2e; border-bottom: 2px solid #1a1a2e; padding-bottom: 0.5rem;">Resumen</h3>';
+
+                // Formatear el resumen (puede tener saltos de línea, listas, etc)
+                let resumenHTML = content.resumen
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n\n/g, '</p><p style="margin: 1rem 0;">')
+                    .replace(/\n/g, '<br>');
+
+                html += `<p style="margin: 1rem 0; text-align: justify;">${resumenHTML}</p>`;
+                html += '</div>';
+            }
+
+            // Puntos clave
+            if (content.puntos_clave && Array.isArray(content.puntos_clave)) {
+                html += '<div style="margin-bottom: 2rem;">';
+                html += '<h3 style="color: #1a1a2e; border-bottom: 2px solid #1a1a2e; padding-bottom: 0.5rem;">Puntos Clave</h3>';
+                html += '<ul style="margin: 1rem 0; padding-left: 2rem;">';
+                content.puntos_clave.forEach((punto: string) => {
+                    html += `<li style="margin: 0.5rem 0;">${punto}</li>`;
+                });
+                html += '</ul></div>';
+            }
+
+            // Conclusión
+            if (content.conclusion) {
+                html += '<div style="margin-bottom: 2rem;">';
+                html += '<h3 style="color: #1a1a2e; border-bottom: 2px solid #1a1a2e; padding-bottom: 0.5rem;">Conclusión</h3>';
+                html += `<p style="margin: 1rem 0; text-align: justify;">${content.conclusion}</p>`;
+                html += '</div>';
+            }
+
+            // Glosario
+            if (content.glosario && Array.isArray(content.glosario)) {
+                html += '<div style="margin-bottom: 2rem;">';
+                html += '<h3 style="color: #1a1a2e; border-bottom: 2px solid #1a1a2e; padding-bottom: 0.5rem;">Glosario</h3>';
+                html += '<dl style="margin: 1rem 0;">';
+                content.glosario.forEach((termino: any) => {
+                    if (typeof termino === 'object') {
+                        html += `<dt style="font-weight: bold; margin-top: 1rem; color: #1a1a2e;">${termino.termino || termino.palabra}</dt>`;
+                        html += `<dd style="margin-left: 2rem; margin-top: 0.3rem;">${termino.definicion}</dd>`;
+                    } else {
+                        html += `<dt style="font-weight: bold; margin-top: 1rem;">${termino}</dt>`;
+                    }
+                });
+                html += '</dl></div>';
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        // Si es texto plano, convertir a HTML básico
+        const text = String(content);
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n\n/g, '</p><p style="margin: 1rem 0;">')
+            .replace(/\n/g, '<br>')
+            .replace(/^(.*)/, '<p style="margin: 1rem 0;">$1')
+            .concat('</p>');
     };
 
     const exportToPDF = () => {

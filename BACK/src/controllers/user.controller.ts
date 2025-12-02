@@ -12,11 +12,19 @@ export const getAllUsers = async (_req: AuthRequest, res: Response) => {
         lastName: true,
         role: true,
         credits: true,
-        subject: true,
-        grade: true,
-        institution: true,
         isActive: true,
         createdAt: true,
+        studentProfile: {
+          include: {
+            institution: { select: { name: true } },
+            grade: { select: { name: true } },
+          },
+        },
+        teacherProfile: {
+          include: {
+            institution: { select: { name: true } },
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -40,12 +48,20 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
         lastName: true,
         role: true,
         credits: true,
-        subject: true,
-        grade: true,
-        institution: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,
+        studentProfile: {
+          include: {
+            institution: true,
+            grade: true,
+          },
+        },
+        teacherProfile: {
+          include: {
+            institution: true,
+          },
+        },
       },
     });
 
@@ -62,16 +78,13 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
 export const updateUser = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { firstName, lastName, subject, grade, institution, isActive } = req.body;
+    const { firstName, lastName, isActive } = req.body;
 
     const user = await prisma.user.update({
       where: { id },
       data: {
         firstName,
         lastName,
-        subject,
-        grade,
-        institution,
         isActive,
       },
       select: {
@@ -81,9 +94,6 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
         lastName: true,
         role: true,
         credits: true,
-        subject: true,
-        grade: true,
-        institution: true,
         isActive: true,
       },
     });

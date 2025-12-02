@@ -20,16 +20,12 @@ export const Register: React.FC = () => {
     setLoading(true);
 
     try {
-      // await register({ email, password, name, role });
       await register({
         email,
         password,
-        firstName,     // Ajuste para backend
-        lastName,        // Si no se pide
+        firstName,
+        lastName,
         role,
-        subject: 'null',
-        grade: 'null',
-        institution: 'null',
       });
       navigate('/dashboard');
     } catch (err: any) {

@@ -144,7 +144,7 @@ export const ActivityDetail: React.FC = () => {
         </div>
 
         <div style={styles.footer}>
-          <p>Creado por: {activity.user?.name || 'Usuario'}</p>
+          <p>Creado por: {activity.user?.firstName} {activity.user?.lastName || 'Usuario'}</p>
           <p>Fecha: {new Date(activity.createdAt).toLocaleString()}</p>
         </div>
       </div>

@@ -37,9 +37,70 @@ export interface User {
   lastName: string;
   role: UserRole;
   credits: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Institution {
+  id: string;
+  name: string;
+  description?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Grade {
+  id: string;
+  name: string;
+  description?: string;
   subject?: string;
-  grade?: string;
-  institution?: string;
+  level?: string;
+  isActive: boolean;
+  institutionId: string;
+  teacherId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface StudentProfile {
+  id: string;
+  userId: string;
+  institutionId: string;
+  gradeId: string;
+  enrollmentDate: Date;
+  studentId?: string;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TeacherProfile {
+  id: string;
+  userId: string;
+  institutionId: string;
+  subject?: string;
+  employmentDate: Date;
+  title?: string;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface InvitationCode {
+  id: string;
+  code: string;
+  gradeId: string;
+  institutionId: string;
+  createdBy: string;
+  description?: string;
+  maxUses?: number;
+  usedCount: number;
+  expiresAt?: Date;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -105,3 +166,4 @@ export interface AIGenerationResponse {
   tokensUsed?: number;
   provider: AIProvider;
 }
+

@@ -26,7 +26,7 @@ export const Navbar: React.FC = () => {
           <Link to="/generate" style={styles.link}>Generar Actividad</Link>
           <div style={styles.userInfo}>
             <span style={styles.credits}>Créditos: {user.credits}</span>
-            <span style={styles.userName}>{user.name}</span>
+            <span style={styles.userName}>{user.firstName} {user.lastName}</span>
             <button onClick={handleLogout} style={styles.logoutBtn}>Cerrar Sesión</button>
           </div>
         </div>

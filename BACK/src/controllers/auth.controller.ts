@@ -5,7 +5,7 @@ import { UserRole } from '../types';
 
 export const register = async (req: AuthRequest, res: Response) => {
   try {
-    const { email, password, firstName, lastName, role, subject, grade, institution } = req.body;
+    const { email, password, firstName, lastName, role } = req.body;
 
     const result = await authService.register({
       email,
@@ -13,9 +13,6 @@ export const register = async (req: AuthRequest, res: Response) => {
       firstName,
       lastName,
       role: role || UserRole.TEACHER,
-      subject,
-      grade,
-      institution,
     });
 
     res.status(201).json(result);

@@ -51,7 +51,7 @@ export const PublicActivities: React.FC = () => {
                   <p style={styles.description}>{activity.description}</p>
                 )}
                 <div style={styles.meta}>
-                  <span>Por: {activity.user?.name || 'Usuario'}</span>
+                  <span>Por: {activity.user?.firstName} {activity.user?.lastName || 'Usuario'}</span>
                   <span>IA: {activity.aiProvider}</span>
                 </div>
                 <div style={styles.date}>

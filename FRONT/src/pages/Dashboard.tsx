@@ -25,7 +25,7 @@ export const Dashboard: React.FC = () => {
       <Navbar />
       <div style={styles.container}>
         <div style={styles.header}>
-          <h1>Bienvenido, {user?.name}!</h1>
+          <h1>Bienvenido, {user?.firstName}!</h1>
           <p style={styles.subtitle}>Selecciona una herramienta para comenzar</p>
         </div>
 

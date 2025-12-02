@@ -17,8 +17,20 @@ export class ValidationError extends AppError {
   }
 }
 
+export class BadRequestError extends AppError {
+  constructor(message: string = 'Bad request') {
+    super(message, 400);
+  }
+}
+
 export class AuthenticationError extends AppError {
   constructor(message: string = 'Authentication failed') {
+    super(message, 401);
+  }
+}
+
+export class UnauthorizedError extends AppError {
+  constructor(message: string = 'Unauthorized') {
     super(message, 401);
   }
 }
@@ -40,3 +52,4 @@ export class InsufficientCreditsError extends AppError {
     super(message, 402);
   }
 }
+

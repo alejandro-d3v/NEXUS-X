@@ -11,9 +11,6 @@ class AuthService {
     firstName: string;
     lastName: string;
     role: UserRole;
-    subject?: string;
-    grade?: string;
-    institution?: string;
   }) {
     const existingUser = await prisma.user.findUnique({
       where: { email: data.email },
@@ -38,9 +35,7 @@ class AuthService {
         lastName: true,
         role: true,
         credits: true,
-        subject: true,
-        grade: true,
-        institution: true,
+        isActive: true,
         createdAt: true,
       },
     });

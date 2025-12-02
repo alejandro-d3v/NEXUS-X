@@ -1,6 +1,6 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { Toaster } from 'react-hot-toast';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
@@ -9,22 +9,81 @@ import { GenerateActivity } from './pages/GenerateActivity';
 import { MyActivities } from './pages/MyActivities';
 import { PublicActivities } from './pages/PublicActivities';
 import { ActivityDetail } from './pages/ActivityDetail';
+import { UserRole } from './types';
+
+// Admin pages
+import { AdminDashboard } from './pages/admin/Dashboard';
+import { InstitutionManagement } from './pages/admin/InstitutionManagement';
+import { UserManagement } from './pages/admin/UserManagement';
+import { GradeManagement } from './pages/admin/GradeManagement';
+
+const DashboardRedirect = () => {
+  const { user } = useAuth();
+
+  if (!user) return <Navigate to="/login" replace />;
+
+  // Redirect based on role
+  if (user.role === UserRole.ADMIN) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  // Default dashboard for TEACHER and STUDENT
+  return <Dashboard />;
+};
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <Toaster position="top-right" />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          {/* Dashboard redirect */}
           <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <DashboardRedirect />
               </ProtectedRoute>
             }
           />
+
+          {/* Admin Routes */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/institutions"
+            element={
+              <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+                <InstitutionManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+                <UserManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/grades"
+            element={
+              <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+                <GradeManagement />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Existing routes */}
           <Route
             path="/generate"
             element={

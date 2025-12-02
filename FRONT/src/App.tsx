@@ -6,6 +6,8 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { GenerateActivity } from './pages/GenerateActivity';
+import { GenerateExam } from './pages/GenerateExam';
+import { GenerateSummary } from './pages/GenerateSummary';
 import { MyActivities } from './pages/MyActivities';
 import { PublicActivities } from './pages/PublicActivities';
 import { ActivityDetail } from './pages/ActivityDetail';
@@ -30,6 +32,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <GenerateActivity />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/generate-exam"
+            element={
+              <ProtectedRoute>
+                <GenerateExam />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/generate-summary"
+            element={
+              <ProtectedRoute>
+                <GenerateSummary />
               </ProtectedRoute>
             }
           />

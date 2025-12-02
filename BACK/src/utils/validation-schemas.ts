@@ -17,7 +17,7 @@ export const loginSchema = Joi.object({
 });
 
 export const generateActivitySchema = Joi.object({
-  prompt: Joi.string().required(),
+  prompt: Joi.string().optional().allow(''),
   provider: Joi.string().valid('OPENAI', 'GEMINI', 'OLLAMA').required(),
   type: Joi.string().valid(
     'EXAM',
@@ -32,8 +32,8 @@ export const generateActivitySchema = Joi.object({
     'CHATBOT',
     'WRITING_CORRECTION'
   ).required(),
-  subject: Joi.string().required(),
-  grade: Joi.string().required(),
+  subject: Joi.string().optional().allow(''),
+  grade: Joi.string().optional().allow(''),
   title: Joi.string().optional(),
   description: Joi.string().optional(),
   visibility: Joi.string().valid('PRIVATE', 'PUBLIC').optional(),

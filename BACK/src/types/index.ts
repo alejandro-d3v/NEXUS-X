@@ -84,6 +84,8 @@ export interface AIGenerationRequest {
   subject: string;
   grade: string;
   additionalParams?: ExamParams | Record<string, any>;
+  pdfContext?: string;
+  pdfFileName?: string;
 }
 
 export interface ExamParams {

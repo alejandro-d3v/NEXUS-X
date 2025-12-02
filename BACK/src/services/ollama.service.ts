@@ -16,7 +16,24 @@ class OllamaService {
   async generate(request: AIGenerationRequest): Promise<AIGenerationResponse> {
     try {
       const systemPrompt = this.getSystemPrompt(request.type);
-      const fullPrompt = `${systemPrompt}\n\n${request.prompt}\n\nResponde únicamente con JSON válido.`;
+
+      // Construir el prompt incluyendo el contexto del PDF si existe
+      let userPrompt = request.prompt;
+      if (request.pdfContext) {
+        userPrompt = `
+CONTEXTO DEL PDF (${request.pdfFileName || 'documento.pdf'}):
+---
+${request.pdfContext}
+---
+
+INSTRUCCIONES DEL USUARIO:
+${request.prompt}
+
+IMPORTANTE: Genera el contenido basándote principalmente en el contenido del PDF proporcionado arriba.
+`;
+      }
+
+      const fullPrompt = `${systemPrompt}\n\n${userPrompt}\n\nResponde únicamente con JSON válido.`;
 
       const response = await axios.post(`${this.baseUrl}/api/generate`, {
         model: this.model,

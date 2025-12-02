@@ -24,6 +24,8 @@ export const Navbar: React.FC = () => {
           <Link to="/my-activities" style={styles.link}>Mis Actividades</Link>
           <Link to="/public-activities" style={styles.link}>Actividades Públicas</Link>
           <Link to="/generate" style={styles.link}>Generar Actividad</Link>
+          <Link to="/generate-exam" style={styles.link}>Generar Examen</Link>
+          <Link to="/generate-summary" style={styles.link}>Generar Resumen</Link>
           <div style={styles.userInfo}>
             <span style={styles.credits}>Créditos: {user.credits}</span>
             <span style={styles.userName}>{user.name}</span>

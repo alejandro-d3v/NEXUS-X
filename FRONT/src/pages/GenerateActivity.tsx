@@ -7,7 +7,7 @@ import { ActivityType, ActivityVisibility, AIProvider } from '../types';
 export const GenerateActivity: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -26,7 +26,7 @@ export const GenerateActivity: React.FC = () => {
     cantidadOM: 5,
     cantidadVF: 5,
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [validationError, setValidationError] = useState('');
@@ -37,7 +37,7 @@ export const GenerateActivity: React.FC = () => {
       const total = Number(formData.cantidadPreguntas);
       const om = Number(formData.cantidadOM);
       const vf = Number(formData.cantidadVF);
-      
+
       if (om + vf !== total) {
         setValidationError(`La suma de preguntas OM (${om}) y VF (${vf}) debe ser igual al total (${total})`);
         return false;
@@ -51,23 +51,49 @@ export const GenerateActivity: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     // Validar preguntas de examen antes de enviar
     if (!validateExamQuestions()) {
       return;
     }
-    
+
     setLoading(true);
 
     try {
-      // Payload base
+      // Generar prompt automáticamente si está vacío
+      let generatedPrompt = formData.prompt.trim();
+
+      if (!generatedPrompt) {
+        const parts = [];
+
+        if (formData.type === ActivityType.EXAM) {
+          parts.push(`Genera un examen de ${formData.cantidadPreguntas} preguntas`);
+          if (formData.subject) parts.push(`sobre ${formData.subject}`);
+          if (formData.grade) parts.push(`para nivel ${formData.grade}`);
+          if (formData.difficulty) parts.push(`con dificultad ${formData.difficulty}`);
+          parts.push(`\n- ${formData.cantidadOM} preguntas de opción múltiple`);
+          parts.push(`\n- ${formData.cantidadVF} preguntas de verdadero/falso`);
+          if (formData.title) parts.push(`\nTítulo: ${formData.title}`);
+          if (formData.description) parts.push(`\nDescripción: ${formData.description}`);
+          if (formData.additionalInstructions) parts.push(`\nInstrucciones adicionales: ${formData.additionalInstructions}`);
+        } else {
+          parts.push(`Genera un(a) ${formData.type.toLowerCase()}`);
+          if (formData.subject) parts.push(`sobre ${formData.subject}`);
+          if (formData.grade) parts.push(`para nivel ${formData.grade}`);
+          if (formData.title) parts.push(`\nTítulo: ${formData.title}`);
+          if (formData.description) parts.push(`\nDescripción: ${formData.description}`);
+        }
+
+        generatedPrompt = parts.join(' ');
+      }
+
       const payload: any = {
         title: formData.title,
         description: formData.description,
         type: formData.type,
         visibility: formData.visibility,
         provider: formData.provider,
-        prompt: formData.prompt,
+        prompt: generatedPrompt,
         subject: formData.subject,
         grade: formData.grade,
       };
@@ -90,9 +116,10 @@ export const GenerateActivity: React.FC = () => {
       }
 
       const activity = await activityService.generateActivity(payload as any);
+
       navigate(`/activity/${activity.id}`);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al generar la actividad');
+      setError(err.response?.data?.error || err.response?.data?.message || 'Error al generar la actividad');
     } finally {
       setLoading(false);
     }
@@ -107,10 +134,10 @@ export const GenerateActivity: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
-    
+
     // Validar en tiempo real si es campo de examen
-    if (formData.type === ActivityType.EXAM && 
-        ['cantidadPreguntas', 'cantidadOM', 'cantidadVF'].includes(e.target.name)) {
+    if (formData.type === ActivityType.EXAM &&
+      ['cantidadPreguntas', 'cantidadOM', 'cantidadVF'].includes(e.target.name)) {
       setTimeout(validateExamQuestions, 100);
     }
   };
@@ -194,19 +221,6 @@ export const GenerateActivity: React.FC = () => {
                 <option value={AIProvider.OLLAMA}>Ollama</option>
               </select>
             </div>
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Prompt / Instrucciones *</label>
-            <textarea
-              name="prompt"
-              value={formData.prompt}
-              onChange={handleChange}
-              required
-              style={styles.textarea}
-              rows={5}
-              placeholder="Describe lo que quieres generar..."
-            />
           </div>
 
           <div style={styles.row}>

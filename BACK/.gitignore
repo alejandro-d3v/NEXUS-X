@@ -6,6 +6,7 @@ dist/
 
 *.log
 logs/
+uploads/
 
 .DS_Store
 Thumbs.db

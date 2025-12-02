@@ -17,13 +17,13 @@ class OpenAIService {
   async generate(request: AIGenerationRequest): Promise<AIGenerationResponse> {
     try {
       const systemPrompt = this.getSystemPrompt(request.type);
-      
+
       // Construir el prompt del usuario según el tipo de actividad
       let userPrompt = request.prompt;
       if (request.type === 'EXAM' && request.additionalParams) {
         userPrompt = this.buildExamPrompt(request);
       }
-      
+
       const completion = await this.client.chat.completions.create({
         model: 'gpt-5-nano',
         messages: [
@@ -50,13 +50,38 @@ class OpenAIService {
   private buildExamPrompt(request: AIGenerationRequest): string {
     const examTemplate = require('../templates/exam.json');
     const params = request.additionalParams || {};
-    
+
+    // Construir el contexto base
+    let contextualPrompt = '';
+
+    if (request.pdfContext) {
+      // Si hay PDF, usarlo como contexto principal
+      contextualPrompt = `
+### Contenido del PDF (usar como base del examen):
+
+Archivo: ${request.pdfFileName || 'documento.pdf'}
+
+${request.pdfContext}
+
+### Instrucciones adicionales del usuario:
+${request.prompt}
+`;
+    } else {
+      // Sin PDF, usar el prompt normal
+      contextualPrompt = `
+### Contexto para el examen:
+${request.prompt}
+`;
+    }
+
     return `
 Genera un examen en formato JSON utilizando la siguiente estructura fija:
 
 ${JSON.stringify(examTemplate, null, 2)}
 
 Rellena todos los campos con contenido original y educativo.
+
+${contextualPrompt}
 
 ### Parámetros del examen:
 
@@ -84,10 +109,9 @@ Cantidad de verdadero/falso: ${params.cantidadVF || 5}
 - No escribas explicación, solo JSON puro.
 - Puedes enriquecer enunciados de manera flexible, pero sin romper el formato.
 - El índice de respuesta_correcta en opción múltiple debe ser un número del 0 al 3.
+${request.pdfContext ? '- IMPORTANTE: Todas las preguntas deben basarse en el contenido del PDF proporcionado.' : ''}
 
 ${params.instruccionesAdicionales || ''}
-
-Contexto adicional: ${request.prompt}
     `.trim();
   }
 

@@ -3,7 +3,18 @@ import { Activity, GenerateActivityRequest } from '../types';
 
 export const activityService = {
   async generateActivity(data: GenerateActivityRequest): Promise<Activity> {
-    const response = await api.post<Activity>('/activities/generate', data);
+    const response = await api.post<any>('/activities/generate', data);
+    console.log('API Response:', response.data);
+    // El backend devuelve { activity, creditsRemaining }
+    return response.data.activity || response.data;
+  },
+
+  async generateActivityWithPDF(formData: FormData): Promise<Activity> {
+    const response = await api.post<Activity>('/activities/generate', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 

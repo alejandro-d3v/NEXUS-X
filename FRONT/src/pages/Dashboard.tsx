@@ -41,7 +41,28 @@ export const Dashboard: React.FC = () => {
         </div>
 
         <div style={styles.toolsGrid}>
-          {tools.map((tool) => (
+          {/* Exam Generator - Special Link */}
+          <Link
+            to="/generate-exam"
+            style={styles.toolCard}
+          >
+            <div style={styles.toolIcon}>📝</div>
+            <h3 style={styles.toolName}>Generador de Exámenes</h3>
+            <p style={styles.toolDescription}>Crea exámenes personalizados</p>
+          </Link>
+
+          {/* Summary Generator - Special Link */}
+          <Link
+            to="/generate-summary"
+            style={styles.toolCard}
+          >
+            <div style={styles.toolIcon}>📄</div>
+            <h3 style={styles.toolName}>Generador de Resúmenes</h3>
+            <p style={styles.toolDescription}>Resume textos largos o PDFs</p>
+          </Link>
+
+          {/* Other tools */}
+          {tools.slice(2).map((tool) => (
             <Link
               key={tool.type}
               to={`/generate?type=${tool.type}`}

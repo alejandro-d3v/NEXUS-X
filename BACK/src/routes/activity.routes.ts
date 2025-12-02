@@ -11,9 +11,11 @@ import { authenticate } from '../middlewares/auth.middleware';
 import { validate } from '../middlewares/validation.middleware';
 import { generateActivitySchema, updateActivitySchema } from '../utils/validation-schemas';
 
+import { upload } from '../middlewares/upload.middleware';
+
 const router = Router();
 
-router.post('/generate', authenticate, validate(generateActivitySchema), generateContent);
+router.post('/generate', authenticate, upload.single('pdfFile'), validate(generateActivitySchema), generateContent);
 router.get('/my-activities', authenticate, getUserActivities);
 router.get('/public', getPublicActivities);
 router.get('/:id', authenticate, getActivity);

@@ -12,7 +12,64 @@ export const generateContent = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { prompt, provider, type, subject, grade, title, description, visibility } = req.body;
+    let { prompt, provider, type, subject, grade, title, description, visibility, additionalParams } = req.body;
+
+    // Procesar archivo PDF si existe
+    let pdfContext = '';
+    let pdfFileName = '';
+
+    if (req.file) {
+      try {
+        const ocrService = (await import('../services/ocr.service')).default;
+        pdfContext = await ocrService.extractTextFromPDF(req.file.path);
+        pdfFileName = req.file.originalname;
+
+        // Eliminar archivo temporal después de procesarlo
+        const fs = await import('fs');
+        fs.unlinkSync(req.file.path);
+      } catch (ocrError: any) {
+        return res.status(400).json({ error: `Error al procesar el PDF: ${ocrError.message}` });
+      }
+    }
+
+    // Si no se proporciona prompt, generarlo automáticamente
+    if (!prompt || prompt.trim() === '') {
+      // Parse additionalParams if needed to get more details
+      let params = additionalParams;
+      if (typeof additionalParams === 'string') {
+        try {
+          params = JSON.parse(additionalParams);
+        } catch (e) {
+          params = {};
+        }
+      }
+
+      // Generar prompt automáticamente basado en los campos del formulario
+      const parts = [];
+
+      if (type === 'EXAM') {
+        parts.push(`Genera un examen`);
+        if (params?.cantidadPreguntas) {
+          parts.push(`de ${params.cantidadPreguntas} preguntas`);
+        }
+        if (subject) parts.push(`sobre ${subject}`);
+        if (grade) parts.push(`para nivel ${grade}`);
+        if (params?.dificultad) parts.push(`con dificultad ${params.dificultad}`);
+        if (params?.cantidadOM) parts.push(`\n- ${params.cantidadOM} preguntas de opción múltiple`);
+        if (params?.cantidadVF) parts.push(`\n- ${params.cantidadVF} preguntas de verdadero/falso`);
+        if (title) parts.push(`\nTítulo: ${title}`);
+        if (description) parts.push(`\nDescripción: ${description}`);
+        if (params?.instruccionesAdicionales) parts.push(`\nInstrucciones adicionales: ${params.instruccionesAdicionales}`);
+      } else {
+        parts.push(`Genera un(a) ${type.toLowerCase()}`);
+        if (subject) parts.push(`sobre ${subject}`);
+        if (grade) parts.push(`para nivel ${grade}`);
+        if (title) parts.push(`\nTítulo: ${title}`);
+        if (description) parts.push(`\nDescripción: ${description}`);
+      }
+
+      prompt = parts.join(' ');
+    }
 
     const creditCost = creditService.getCreditCost(provider as AIProvider);
     const userCredits = await creditService.getUserCredits(userId);
@@ -21,12 +78,25 @@ export const generateContent = async (req: AuthRequest, res: Response) => {
       return res.status(402).json({ error: 'Insufficient credits' });
     }
 
+    // Parse additionalParams if it's a string
+    let parsedAdditionalParams = additionalParams;
+    if (typeof additionalParams === 'string') {
+      try {
+        parsedAdditionalParams = JSON.parse(additionalParams);
+      } catch (e) {
+        // If parsing fails, use as-is
+      }
+    }
+
     const aiResponse = await aiService.generate({
       prompt,
       provider: provider as AIProvider,
       type: type as ActivityType,
       subject,
       grade,
+      additionalParams: parsedAdditionalParams,
+      pdfContext,
+      pdfFileName,
     });
 
     await creditService.deductCredits(
@@ -38,7 +108,7 @@ export const generateContent = async (req: AuthRequest, res: Response) => {
 
     const activity = await activityService.createActivity({
       title: title || `${type} - ${subject}`,
-      description,
+      description: description,
       type: type as ActivityType,
       visibility: visibility || ActivityVisibility.PRIVATE,
       content: aiResponse.content,

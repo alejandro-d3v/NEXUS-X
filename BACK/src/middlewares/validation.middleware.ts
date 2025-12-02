@@ -6,12 +6,12 @@ export const validate = (schema: Joi.ObjectSchema) => {
     const { error } = schema.validate(req.body, { abortEarly: false });
 
     if (error) {
-      const errors = error.details.map((detail) => ({
-        field: detail.path.join('.'),
-        message: detail.message,
-      }));
-
-      return res.status(400).json({ errors });
+      console.log('❌ VALIDATION ERROR:', error.details);
+      console.log('📦 Request body:', req.body);
+      return res.status(400).json({
+        error: 'Validation error',
+        details: error.details.map(detail => detail.message),
+      });
     }
 
     return next();

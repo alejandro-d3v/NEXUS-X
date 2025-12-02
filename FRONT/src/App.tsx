@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminLayout } from './components/layouts/AdminLayout';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
@@ -49,39 +50,20 @@ function App() {
             }
           />
 
-          {/* Admin Routes */}
+          {/* Admin Routes with Layout */}
           <Route
-            path="/admin/dashboard"
+            path="/admin"
             element={
               <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
-                <AdminDashboard />
+                <AdminLayout />
               </ProtectedRoute>
             }
-          />
-          <Route
-            path="/admin/institutions"
-            element={
-              <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
-                <InstitutionManagement />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
-                <UserManagement />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/grades"
-            element={
-              <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
-                <GradeManagement />
-              </ProtectedRoute>
-            }
-          />
+          >
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="institutions" element={<InstitutionManagement />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="grades" element={<GradeManagement />} />
+          </Route>
 
           {/* Existing routes */}
           <Route

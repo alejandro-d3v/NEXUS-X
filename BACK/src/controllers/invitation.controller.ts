@@ -105,3 +105,26 @@ export const updateCode = async (req: AuthRequest, res: Response) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+// Public endpoint for joining via invitation link
+export const joinWithCode = async (req: AuthRequest, res: Response) => {
+    try {
+        const { code } = req.params;
+        const { firstName, lastName, email, password } = req.body;
+        const userId = req.user?.userId; // Will be undefined if not authenticated
+
+        const result = await invitationService.joinWithCode(
+            code,
+            userId,
+            { firstName, lastName, email, password }
+        );
+
+        res.status(200).json(result);
+    } catch (error: any) {
+        const status = error.message.includes('expired') ||
+            error.message.includes('maximum') ||
+            error.message.includes('already enrolled') ||
+            error.message.includes('Invalid') ? 400 : 500;
+        res.status(status).json({ error: error.message });
+    }
+};

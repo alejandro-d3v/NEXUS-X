@@ -263,6 +263,214 @@ class InvitationService {
 
         return code;
     }
+
+    // Public method for joining via invitation link
+    async joinWithCode(
+        code: string,
+        userId?: string,
+        userData?: {
+            firstName?: string;
+            lastName?: string;
+            email?: string;
+            password?: string;
+        }
+    ) {
+        // Validate code first
+        const validation = await this.validateCode(code);
+
+        if (!validation.valid) {
+            throw new BadRequestError(validation.message!);
+        }
+
+        const { grade, institution } = validation;
+        const bcrypt = require('bcryptjs');
+        const jwt = require('jsonwebtoken');
+        const { config } = require('../config');
+        const { UserRole } = require('../types');
+
+        // Case 1: User is authenticated (already registered)
+        if (userId) {
+            // Check if user exists and is a student
+            const user = await prisma.user.findUnique({
+                where: { id: userId },
+                include: { studentProfile: true },
+            });
+
+            if (!user) {
+                throw new NotFoundError('User not found');
+            }
+
+            if (user.role !== UserRole.STUDENT) {
+                throw new BadRequestError('Only students can join courses');
+            }
+
+            // Check if already enrolled in this grade
+            if (user.studentProfile && user.studentProfile.gradeId === grade!.id) {
+                throw new BadRequestError('You are already enrolled in this grade');
+            }
+
+            // If student profile exists but different grade, update it
+            // If no student profile, create one
+            let studentProfile;
+            if (user.studentProfile) {
+                studentProfile = await prisma.studentProfile.update({
+                    where: { userId: user.id },
+                    data: {
+                        gradeId: grade!.id,
+                        institutionId: institution!.id,
+                    },
+                    include: {
+                        grade: {
+                            include: {
+                                institution: true,
+                                teacher: {
+                                    include: {
+                                        user: {
+                                            select: {
+                                                firstName: true,
+                                                lastName: true,
+                                                email: true,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        institution: true,
+                    },
+                });
+            } else {
+                studentProfile = await prisma.studentProfile.create({
+                    data: {
+                        userId: user.id,
+                        institutionId: institution!.id,
+                        gradeId: grade!.id,
+                        studentId: `STU-${Date.now()}`, // Auto-generate student ID
+                    },
+                    include: {
+                        grade: {
+                            include: {
+                                institution: true,
+                                teacher: {
+                                    include: {
+                                        user: {
+                                            select: {
+                                                firstName: true,
+                                                lastName: true,
+                                                email: true,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        institution: true,
+                    },
+                });
+            }
+
+            // Increment code usage
+            await prisma.invitationCode.update({
+                where: { code },
+                data: { usedCount: { increment: 1 } },
+            });
+
+            const { password: _, ...userWithoutPassword } = user;
+
+            return {
+                success: true,
+                message: `Successfully enrolled in ${grade!.name}`,
+                user: userWithoutPassword,
+                studentProfile,
+                grade: studentProfile.grade,
+                institution: studentProfile.institution,
+            };
+        }
+
+        // Case 2: User is NOT authenticated (new registration)
+        if (!userData || !userData.email || !userData.password || !userData.firstName || !userData.lastName) {
+            throw new BadRequestError('First name, last name, email, and password are required');
+        }
+
+        // Check if email already exists
+        const existingUser = await prisma.user.findUnique({
+            where: { email: userData.email },
+        });
+
+        if (existingUser) {
+            throw new BadRequestError('An account with this email already exists. Please login instead.');
+        }
+
+        const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+        // Create user and student profile in transaction
+        const result = await prisma.$transaction(async (tx) => {
+            const newUser = await tx.user.create({
+                data: {
+                    email: userData.email!,
+                    password: hashedPassword,
+                    firstName: userData.firstName!,
+                    lastName: userData.lastName!,
+                    role: UserRole.STUDENT,
+                    credits: config.credits.default,
+                },
+            });
+
+            const studentProfile = await tx.studentProfile.create({
+                data: {
+                    userId: newUser.id,
+                    institutionId: institution!.id,
+                    gradeId: grade!.id,
+                    studentId: `STU-${Date.now()}`, // Auto-generate student ID
+                },
+                include: {
+                    grade: {
+                        include: {
+                            institution: true,
+                            teacher: {
+                                include: {
+                                    user: {
+                                        select: {
+                                            firstName: true,
+                                            lastName: true,
+                                            email: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    institution: true,
+                },
+            });
+
+            await tx.invitationCode.update({
+                where: { code },
+                data: { usedCount: { increment: 1 } },
+            });
+
+            return { user: newUser, studentProfile };
+        });
+
+        // Generate JWT token for auto-login
+        const token = jwt.sign(
+            { userId: result.user.id, role: result.user.role },
+            config.jwt.secret,
+            { expiresIn: config.jwt.expiresIn }
+        );
+
+        const { password: _, ...userWithoutPassword } = result.user;
+
+        return {
+            success: true,
+            message: `Account created successfully! Welcome to ${grade!.name}!`,
+            user: userWithoutPassword,
+            studentProfile: result.studentProfile,
+            grade: result.studentProfile.grade,
+            institution: result.studentProfile.institution,
+            token, // Return token for auto-login
+        };
+    }
 }
 
 export default new InvitationService();

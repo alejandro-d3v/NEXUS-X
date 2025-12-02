@@ -152,14 +152,26 @@ export const Invitations: React.FC = () => {
             key: 'actions',
             label: 'Actions',
             render: (item: InvitationCode) => (
-                <button
-                    onClick={() => handleDeactivate(item.id)}
-                    className="btn-icon btn-danger"
-                    title="Deactivate"
-                    disabled={!item.isActive}
-                >
-                    <FaTrash />
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                        onClick={() => {
+                            navigator.clipboard.writeText(`${window.location.origin}/join/${item.code}`);
+                            toast.success('Link copied to clipboard!');
+                        }}
+                        className="btn-icon"
+                        title="Copy invitation link"
+                    >
+                        <FaCopy />
+                    </button>
+                    <button
+                        onClick={() => handleDeactivate(item.id)}
+                        className="btn-icon btn-danger"
+                        title="Deactivate"
+                        disabled={!item.isActive}
+                    >
+                        <FaTrash />
+                    </button>
+                </div>
             ),
         },
     ];
@@ -273,8 +285,10 @@ export const Invitations: React.FC = () => {
 
                         <div className="invitation-code-card">
                             <FaTicketAlt size={48} />
-                            <p style={{ margin: '1rem 0 0.5rem', fontSize: '1.1rem' }}>
-                                Share this code with students:
+
+                            {/* Code Section */}
+                            <p style={{ margin: '1.5rem 0 0.5rem', fontSize: '1.1rem', fontWeight: 600 }}>
+                                Share this code:
                             </p>
                             <div className="invitation-code-display">{generatedCode.code}</div>
                             <button
@@ -283,6 +297,36 @@ export const Invitations: React.FC = () => {
                             >
                                 <FaCopy /> Copy Code
                             </button>
+
+                            {/* Link Section */}
+                            <div style={{ margin: '2rem 0 1rem', borderTop: '1px solid #e5e7eb', paddingTop: '1.5rem' }}>
+                                <p style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+                                    Or share this link:
+                                </p>
+                                <div style={{
+                                    background: '#f3f4f6',
+                                    padding: '0.75rem',
+                                    borderRadius: '8px',
+                                    marginBottom: '0.75rem',
+                                    wordBreak: 'break-all',
+                                    fontFamily: 'monospace',
+                                    fontSize: '0.9rem'
+                                }}>
+                                    {window.location.origin}/join/{generatedCode.code}
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(`${window.location.origin}/join/${generatedCode.code}`);
+                                        toast.success('Link copied to clipboard!');
+                                    }}
+                                    className="copy-code-btn"
+                                    style={{ background: '#10b981' }}
+                                >
+                                    <FaCopy /> Copy Link
+                                </button>
+                            </div>
+
+                            {/* Grade Info */}
                             <p style={{ marginTop: '1.5rem', fontSize: '0.9rem', opacity: 0.9 }}>
                                 Grade: <strong>{generatedCode.grade?.name}</strong>
                             </p>

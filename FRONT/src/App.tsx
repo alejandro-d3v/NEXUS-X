@@ -11,6 +11,8 @@ import { GenerateActivity } from './pages/GenerateActivity';
 import { MyActivities } from './pages/MyActivities';
 import { PublicActivities } from './pages/PublicActivities';
 import { ActivityDetail } from './pages/ActivityDetail';
+import { JoinCourse } from './pages/JoinCourse';
+import { WelcomeCourse } from './pages/WelcomeCourse';
 import { UserRole } from './types';
 
 // Admin pages
@@ -25,6 +27,11 @@ import { MyGrades } from './pages/teacher/MyGrades';
 import { Invitations } from './pages/teacher/Invitations';
 import { StudentRoster } from './pages/teacher/StudentRoster';
 
+// Student pages
+import { StudentLayout } from './components/layouts/StudentLayout';
+import { StudentDashboard } from './pages/student/Dashboard';
+import { StudentProfile } from './pages/student/Profile';
+
 const DashboardRedirect = () => {
   const { user } = useAuth();
 
@@ -37,7 +44,10 @@ const DashboardRedirect = () => {
   if (user.role === UserRole.TEACHER) {
     return <Navigate to="/teacher/dashboard" replace />;
   }
-  // Default dashboard for STUDENT
+  if (user.role === UserRole.STUDENT) {
+    return <Navigate to="/student/dashboard" replace />;
+  }
+  // Fallback
   return <Dashboard />;
 };
 
@@ -47,6 +57,16 @@ function App() {
       <BrowserRouter>
         <Toaster position="top-right" />
         <Routes>
+          {/* Public Routes */}
+          <Route path="/join/:code" element={<JoinCourse />} />
+          <Route
+            path="/welcome"
+            element={
+              <ProtectedRoute allowedRoles={[UserRole.STUDENT]}>
+                <WelcomeCourse />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
@@ -88,6 +108,19 @@ function App() {
             <Route path="grades" element={<MyGrades />} />
             <Route path="invitations" element={<Invitations />} />
             <Route path="students" element={<StudentRoster />} />
+          </Route>
+
+          {/* Student Routes with Layout */}
+          <Route
+            path="/student"
+            element={
+              <ProtectedRoute allowedRoles={[UserRole.STUDENT]}>
+                <StudentLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="dashboard" element={<StudentDashboard />} />
+            <Route path="profile" element={<StudentProfile />} />
           </Route>
 
           {/* Existing routes */}

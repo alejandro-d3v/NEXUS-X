@@ -41,7 +41,48 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    return res.json({ user: req.user });
+    // Fetch user from database with all relations
+    const prisma = require('../config/database').default;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        studentProfile: {
+          include: {
+            grade: {
+              include: {
+                institution: true,
+                teacher: {
+                  include: {
+                    user: {
+                      select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            institution: true,
+          },
+        },
+        teacherProfile: {
+          include: {
+            institution: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Remove password from response
+    const { password: _, ...userWithoutPassword } = user;
+
+    return res.json({ user: userWithoutPassword });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
   }

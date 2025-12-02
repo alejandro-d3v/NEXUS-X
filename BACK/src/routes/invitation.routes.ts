@@ -7,8 +7,9 @@ import {
     getCodesByInstitution,
     deactivateCode,
     updateCode,
+    joinWithCode,
 } from '../controllers/invitation.controller';
-import { authenticate, authorize } from '../middlewares/auth.middleware';
+import { authenticate, authorize, optionalAuth } from '../middlewares/auth.middleware';
 import { UserRole } from '../types';
 
 const router = Router();
@@ -19,6 +20,9 @@ router.post('/generate', authenticate, authorize(UserRole.ADMIN, UserRole.TEACHE
 // Validate and use code - PUBLIC (no auth required for student registration)
 router.post('/validate', validateCode);
 router.post('/use', useCode);
+
+// Public join endpoint - works for both authenticated and non-authenticated users
+router.post('/join/:code', optionalAuth, joinWithCode);
 
 // View codes - ADMIN and TEACHER
 router.get('/', authenticate, authorize(UserRole.ADMIN, UserRole.TEACHER), getCodesByGrade);

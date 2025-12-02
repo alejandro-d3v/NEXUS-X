@@ -37,3 +37,21 @@ export const authorize = (...roles: UserRole[]) => {
     return next();
   };
 };
+
+// Optional authentication - doesn't fail if no token provided
+export const optionalAuth = (req: AuthRequest, _res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      const payload = authService.verifyToken(token);
+      req.user = payload;
+    }
+    // If no token or invalid token, just continue without user
+    return next();
+  } catch (error) {
+    // Invalid token, but we don't fail - just continue without user
+    return next();
+  }
+};

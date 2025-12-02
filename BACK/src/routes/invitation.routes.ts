@@ -21,6 +21,7 @@ router.post('/validate', validateCode);
 router.post('/use', useCode);
 
 // View codes - ADMIN and TEACHER
+router.get('/', authenticate, authorize(UserRole.ADMIN, UserRole.TEACHER), getCodesByGrade);
 router.get('/grade/:gradeId', authenticate, authorize(UserRole.ADMIN, UserRole.TEACHER), getCodesByGrade);
 router.get('/institution/:institutionId', authenticate, authorize(UserRole.ADMIN), getCodesByInstitution);
 

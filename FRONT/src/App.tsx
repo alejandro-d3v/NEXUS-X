@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AdminLayout } from './components/layouts/AdminLayout';
+import { TeacherLayout } from './components/layouts/TeacherLayout';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
@@ -18,6 +19,12 @@ import { InstitutionManagement } from './pages/admin/InstitutionManagement';
 import { UserManagement } from './pages/admin/UserManagement';
 import { GradeManagement } from './pages/admin/GradeManagement';
 
+// Teacher pages
+import { TeacherDashboard } from './pages/teacher/Dashboard';
+import { MyGrades } from './pages/teacher/MyGrades';
+import { Invitations } from './pages/teacher/Invitations';
+import { StudentRoster } from './pages/teacher/StudentRoster';
+
 const DashboardRedirect = () => {
   const { user } = useAuth();
 
@@ -27,7 +34,10 @@ const DashboardRedirect = () => {
   if (user.role === UserRole.ADMIN) {
     return <Navigate to="/admin/dashboard" replace />;
   }
-  // Default dashboard for TEACHER and STUDENT
+  if (user.role === UserRole.TEACHER) {
+    return <Navigate to="/teacher/dashboard" replace />;
+  }
+  // Default dashboard for STUDENT
   return <Dashboard />;
 };
 
@@ -63,6 +73,21 @@ function App() {
             <Route path="institutions" element={<InstitutionManagement />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="grades" element={<GradeManagement />} />
+          </Route>
+
+          {/* Teacher Routes with Layout */}
+          <Route
+            path="/teacher"
+            element={
+              <ProtectedRoute allowedRoles={[UserRole.TEACHER]}>
+                <TeacherLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="dashboard" element={<TeacherDashboard />} />
+            <Route path="grades" element={<MyGrades />} />
+            <Route path="invitations" element={<Invitations />} />
+            <Route path="students" element={<StudentRoster />} />
           </Route>
 
           {/* Existing routes */}

@@ -63,4 +63,9 @@ export const invitationService = {
         const response = await api.put(`/invitations/${codeId}`, settings);
         return response.data;
     },
+
+    async getMyCodes(): Promise<InvitationCode[]> {
+        const response = await api.get('/invitations');
+        return response.data;
+    },
 };

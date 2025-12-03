@@ -3,9 +3,26 @@ import { AuthRequest } from '../middlewares/auth.middleware';
 import gradeService from '../services/grade.service';
 import prisma from '../config/database';
 
-export const createGrade = async (req: AuthRequest, res: Response) => {
+export const createGrade = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { name, description, subject, level, institutionId, teacherId } = req.body;
+        const { name, description, subject, level, institutionId } = req.body;
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
+
+        // Get teacher profile ID from user
+        const teacherProfile = await prisma.teacherProfile.findUnique({
+            where: { userId },
+            select: { id: true },
+        });
+
+        if (!teacherProfile) {
+            res.status(404).json({ error: 'Teacher profile not found' });
+            return;
+        }
 
         const grade = await gradeService.createGrade({
             name,
@@ -13,7 +30,7 @@ export const createGrade = async (req: AuthRequest, res: Response) => {
             subject,
             level,
             institutionId,
-            teacherId,
+            teacherId: teacherProfile.id,
         });
 
         res.status(201).json(grade);

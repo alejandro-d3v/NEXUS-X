@@ -156,13 +156,31 @@ model Grade {
   // Relationships
   institution     Institution      @relation(fields: [institutionId], references: [id], onDelete: Cascade)
   teacher         TeacherProfile   @relation(fields: [teacherId], references: [id], onDelete: Restrict)
-  students        StudentProfile[]
+  students        StudentProfile[] @relation("LegacyGrade") // Legacy one-to-many
+  studentGrades   StudentGrade[]   // New many-to-many relationship
   invitationCodes InvitationCode[]
   activityGrades  ActivityGrade[] // Activities assigned to this grade
 
   @@index([institutionId])
   @@index([teacherId])
   @@index([name])
+}
+
+// Junction table for Student-Grade many-to-many relationship
+model StudentGrade {
+  id         String   @id @default(uuid())
+  studentId  String
+  gradeId    String
+  enrolledAt DateTime @default(now())
+  isActive   Boolean  @default(true)
+
+  // Relationships
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  grade   Grade          @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, gradeId])
+  @@index([studentId])
+  @@index([gradeId])
 }
 
 model StudentProfile {
@@ -176,12 +194,13 @@ model StudentProfile {
   // Foreign Keys
   userId        String @unique
   institutionId String
-  gradeId       String
+  gradeId       String? // Keep temporarily for migration, will be removed later
 
   // Relationships
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  institution Institution @relation(fields: [institutionId], references: [id], onDelete: Restrict)
-  grade       Grade       @relation(fields: [gradeId], references: [id], onDelete: Restrict)
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  institution Institution    @relation(fields: [institutionId], references: [id], onDelete: Restrict)
+  grade       Grade?         @relation("LegacyGrade", fields: [gradeId], references: [id], onDelete: Restrict)
+  grades      StudentGrade[] // New many-to-many relationship
 
   @@index([institutionId])
   @@index([gradeId])

@@ -278,17 +278,71 @@ class ActivityService {
   }
 
   async getStudentActivities(userId: string) {
-    // Get student's grade
+    // Get all student's enrolled grades
     const student = await prisma.studentProfile.findUnique({
       where: { userId },
-      select: { gradeId: true },
+      include: {
+        grades: {
+          where: { isActive: true },
+          include: {
+            grade: {
+              select: {
+                id: true,
+                name: true,
+                subject: true,
+                level: true,
+              },
+            },
+          },
+        },
+      },
     });
 
-    if (!student || !student.gradeId) {
+    if (!student || !student.grades || student.grades.length === 0) {
       return [];
     }
 
-    return await this.getActivitiesByGrade(student.gradeId);
+    // Get all grade IDs
+    const gradeIds = student.grades.map(sg => sg.gradeId);
+
+    // Fetch activities for all grades
+    const activityGrades = await prisma.activityGrade.findMany({
+      where: {
+        gradeId: { in: gradeIds },
+      },
+      include: {
+        activity: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+          },
+        },
+        grade: {
+          select: {
+            id: true,
+            name: true,
+            subject: true,
+            level: true,
+          },
+        },
+      },
+      orderBy: {
+        assignedAt: 'desc',
+      },
+    });
+
+    // Return activities with grade information
+    return activityGrades.map(ag => ({
+      ...ag.activity,
+      grade: ag.grade,
+      assignedAt: ag.assignedAt,
+    }));
   }
 }
 

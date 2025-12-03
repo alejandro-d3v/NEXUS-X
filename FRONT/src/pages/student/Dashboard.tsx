@@ -2,8 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
-import { FaUser, FaGraduationCap, FaChalkboardTeacher, FaSpinner, FaEye } from 'react-icons/fa';
+import { FaUser, FaGraduationCap, FaChalkboardTeacher, FaSpinner, FaEye, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import api from '../../services/api';
+
+interface Grade {
+    id: string;
+    name: string;
+    subject?: string;
+    level?: string;
+}
 
 interface Activity {
     id: string;
@@ -16,13 +23,21 @@ interface Activity {
         firstName: string;
         lastName: string;
     };
+    grade: Grade;
+    assignedAt: string;
+}
+
+interface CourseActivities {
+    grade: Grade;
+    activities: Activity[];
 }
 
 export const StudentDashboard: React.FC = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const [courseActivities, setCourseActivities] = useState<Activity[]>([]);
+    const [courseActivities, setCourseActivities] = useState<CourseActivities[]>([]);
     const [loading, setLoading] = useState(true);
+    const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         fetchCourseActivities();
@@ -31,9 +46,29 @@ export const StudentDashboard: React.FC = () => {
     const fetchCourseActivities = async () => {
         try {
             setLoading(true);
-            // Get activities assigned to student's grade
             const response = await api.get('/activities/student');
-            setCourseActivities(response.data);
+            const activities: Activity[] = response.data;
+
+            // Group activities by grade
+            const grouped = activities.reduce((acc, activity) => {
+                const gradeId = activity.grade.id;
+                if (!acc[gradeId]) {
+                    acc[gradeId] = {
+                        grade: activity.grade,
+                        activities: [],
+                    };
+                }
+                acc[gradeId].activities.push(activity);
+                return acc;
+            }, {} as Record<string, CourseActivities>);
+
+            const groupedArray = Object.values(grouped);
+            setCourseActivities(groupedArray);
+
+            // Expand first course by default
+            if (groupedArray.length > 0) {
+                setExpandedCourses(new Set([groupedArray[0].grade.id]));
+            }
         } catch (error: any) {
             toast.error('Error al cargar actividades');
             console.error(error);
@@ -42,10 +77,22 @@ export const StudentDashboard: React.FC = () => {
         }
     };
 
+    const toggleCourse = (gradeId: string) => {
+        setExpandedCourses(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(gradeId)) {
+                newSet.delete(gradeId);
+            } else {
+                newSet.add(gradeId);
+            }
+            return newSet;
+        });
+    };
+
     const studentProfile = user?.studentProfile;
-    const grade = studentProfile?.grade;
     const institution = studentProfile?.institution;
-    const teacher = grade?.teacher;
+
+    const totalActivities = courseActivities.reduce((sum, course) => sum + course.activities.length, 0);
 
     return (
         <div className="page-container">
@@ -58,7 +105,7 @@ export const StudentDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Profile and Grade Info Cards */}
+            {/* Profile and Courses Info Cards */}
             <div className="info-cards-grid">
                 {/* Profile Card */}
                 <div className="info-card">
@@ -80,8 +127,8 @@ export const StudentDashboard: React.FC = () => {
                             <span className="info-value">{studentProfile?.studentId || 'N/A'}</span>
                         </div>
                         <div className="info-row">
-                            <span className="info-label">Credits:</span>
-                            <span className="info-value">{user?.credits || 0}</span>
+                            <span className="info-label">Institution:</span>
+                            <span className="info-value">{institution?.name || 'N/A'}</span>
                         </div>
                         <div className="info-row">
                             <span className="info-label">Status:</span>
@@ -97,43 +144,39 @@ export const StudentDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Grade Info Card */}
+                {/* Courses Summary Card */}
                 <div className="info-card">
                     <div className="info-card-header">
                         <FaGraduationCap className="info-card-icon" style={{ color: '#3b82f6' }} />
-                        <h3>My Course</h3>
+                        <h3>My Courses</h3>
                     </div>
                     <div className="info-card-body">
-                        {grade ? (
+                        {courseActivities.length > 0 ? (
                             <>
                                 <div className="info-row">
-                                    <span className="info-label">Grade:</span>
-                                    <span className="info-value">{grade.name}</span>
+                                    <span className="info-label">Enrolled Courses:</span>
+                                    <span className="info-value">{courseActivities.length}</span>
                                 </div>
                                 <div className="info-row">
-                                    <span className="info-label">Subject:</span>
-                                    <span className="info-value">{grade.subject || 'N/A'}</span>
+                                    <span className="info-label">Total Activities:</span>
+                                    <span className="info-value">{totalActivities}</span>
                                 </div>
-                                <div className="info-row">
-                                    <span className="info-label">Level:</span>
-                                    <span className="info-value">{grade.level || 'N/A'}</span>
+                                <div style={{ marginTop: '1rem' }}>
+                                    {courseActivities.map((course) => (
+                                        <div key={course.grade.id} className="course-badge">
+                                            <span className="badge badge-blue" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>
+                                                {course.grade.name}
+                                            </span>
+                                            <span style={{ marginLeft: '0.5rem', color: '#666', fontSize: '0.9rem' }}>
+                                                ({course.activities.length} {course.activities.length === 1 ? 'activity' : 'activities'})
+                                            </span>
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className="info-row">
-                                    <span className="info-label">Institution:</span>
-                                    <span className="info-value">{institution?.name || 'N/A'}</span>
-                                </div>
-                                {teacher && (
-                                    <div className="info-row">
-                                        <span className="info-label">Teacher:</span>
-                                        <span className="info-value">
-                                            {teacher.user?.firstName} {teacher.user?.lastName}
-                                        </span>
-                                    </div>
-                                )}
                             </>
                         ) : (
                             <p style={{ color: '#999', textAlign: 'center', padding: '1rem' }}>
-                                No course assigned yet. Please contact your administrator.
+                                No courses assigned yet. Please contact your administrator.
                             </p>
                         )}
                     </div>
@@ -144,22 +187,14 @@ export const StudentDashboard: React.FC = () => {
             <div className="section-card" style={{ marginTop: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                     <h2>📚 My Course Activities</h2>
-                    {courseActivities.length > 0 && (
+                    {totalActivities > 0 && (
                         <span className="badge badge-blue" style={{ fontSize: '1rem', padding: '0.5rem 1rem' }}>
-                            {courseActivities.length} {courseActivities.length === 1 ? 'Activity' : 'Activities'}
+                            {totalActivities} Total {totalActivities === 1 ? 'Activity' : 'Activities'}
                         </span>
                     )}
                 </div>
 
-                {!grade ? (
-                    <div className="empty-state">
-                        <FaGraduationCap size={48} color="#ccc" />
-                        <p>You are not enrolled in any course yet</p>
-                        <p style={{ color: '#999', fontSize: '0.9rem' }}>
-                            Please contact your teacher or administrator to join a course
-                        </p>
-                    </div>
-                ) : loading ? (
+                {loading ? (
                     <div style={{ textAlign: 'center', padding: '3rem' }}>
                         <FaSpinner className="spinner" size={32} />
                         <p style={{ marginTop: '1rem', color: '#666' }}>Loading activities...</p>
@@ -167,47 +202,81 @@ export const StudentDashboard: React.FC = () => {
                 ) : courseActivities.length === 0 ? (
                     <div className="empty-state">
                         <FaChalkboardTeacher size={48} color="#ccc" />
-                        <p>No activities assigned yet</p>
+                        <p>No courses or activities assigned yet</p>
                         <p style={{ color: '#999', fontSize: '0.9rem' }}>
-                            Your teacher hasn't assigned any activities to your course yet
+                            Please contact your teacher or administrator to join a course
                         </p>
                     </div>
                 ) : (
-                    <div className="activities-grid">
-                        {courseActivities.map((activity) => (
-                            <div key={activity.id} className="activity-card">
-                                <div className="activity-card-header">
-                                    <h3>{activity.title}</h3>
-                                    <div className="activity-badges">
-                                        <span className="badge badge-blue">{activity.type}</span>
-                                        <span className="badge badge-gray">{activity.subject}</span>
-                                    </div>
-                                </div>
-
-                                {activity.description && (
-                                    <p className="activity-description">{activity.description}</p>
-                                )}
-
-                                <div className="activity-meta">
-                                    <span className="teacher">
-                                        👨‍🏫 {activity.user.firstName} {activity.user.lastName}
-                                    </span>
-                                    <span className="date">
-                                        {new Date(activity.createdAt).toLocaleDateString()}
-                                    </span>
-                                </div>
-
-                                <div className="activity-actions">
-                                    <button
-                                        onClick={() => navigate(`/student/activities/${activity.id}`)}
-                                        className="btn btn-sm btn-primary"
-                                        style={{ width: '100%' }}
+                    <div className="courses-accordion">
+                        {courseActivities.map((course) => {
+                            const isExpanded = expandedCourses.has(course.grade.id);
+                            return (
+                                <div key={course.grade.id} className="course-accordion-item">
+                                    <div
+                                        className="course-accordion-header"
+                                        onClick={() => toggleCourse(course.grade.id)}
                                     >
-                                        <FaEye /> View Activity
-                                    </button>
+                                        <div className="course-info">
+                                            <h3>{course.grade.name}</h3>
+                                            {course.grade.subject && (
+                                                <span className="course-subject">{course.grade.subject}</span>
+                                            )}
+                                            {course.grade.level && (
+                                                <span className="course-level">{course.grade.level}</span>
+                                            )}
+                                        </div>
+                                        <div className="course-accordion-controls">
+                                            <span className="activity-count">
+                                                {course.activities.length} {course.activities.length === 1 ? 'activity' : 'activities'}
+                                            </span>
+                                            {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+                                        </div>
+                                    </div>
+
+                                    {isExpanded && (
+                                        <div className="course-accordion-content">
+                                            <div className="activities-grid">
+                                                {course.activities.map((activity) => (
+                                                    <div key={activity.id} className="activity-card">
+                                                        <div className="activity-card-header">
+                                                            <h3>{activity.title}</h3>
+                                                            <div className="activity-badges">
+                                                                <span className="badge badge-blue">{activity.type}</span>
+                                                                <span className="badge badge-gray">{activity.subject}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        {activity.description && (
+                                                            <p className="activity-description">{activity.description}</p>
+                                                        )}
+
+                                                        <div className="activity-meta">
+                                                            <span className="teacher">
+                                                                👨‍🏫 {activity.user.firstName} {activity.user.lastName}
+                                                            </span>
+                                                            <span className="date">
+                                                                {new Date(activity.createdAt).toLocaleDateString()}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="activity-actions">
+                                                            <button
+                                                                onClick={() => navigate(`/student/activities/${activity.id}`)}
+                                                                className="btn btn-sm btn-primary"
+                                                                style={{ width: '100%' }}
+                                                            >
+                                                                <FaEye /> View Activity
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>

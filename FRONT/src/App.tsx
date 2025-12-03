@@ -33,6 +33,7 @@ import { ActivityDetail } from './pages/teacher/ActivityDetail';
 import { StudentLayout } from './components/layouts/StudentLayout';
 import { StudentDashboard } from './pages/student/Dashboard';
 import { StudentProfile } from './pages/student/Profile';
+import { StudentActivityDetail } from './pages/student/StudentActivityDetail';
 
 const DashboardRedirect = () => {
   const { user } = useAuth();
@@ -127,13 +128,14 @@ function App() {
           >
             <Route path="dashboard" element={<StudentDashboard />} />
             <Route path="profile" element={<StudentProfile />} />
+            <Route path="activities/:id" element={<StudentActivityDetail />} />
           </Route>
 
-          {/* Existing routes */}
+          {/* Existing routes - Restricted to Teachers/Admins only */}
           <Route
             path="/generate"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.TEACHER]}>
                 <GenerateActivity />
               </ProtectedRoute>
             }
@@ -141,7 +143,7 @@ function App() {
           <Route
             path="/my-activities"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.TEACHER]}>
                 <MyActivities />
               </ProtectedRoute>
             }
@@ -149,7 +151,7 @@ function App() {
           <Route
             path="/public-activities"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.TEACHER]}>
                 <PublicActivities />
               </ProtectedRoute>
             }
@@ -157,7 +159,7 @@ function App() {
           <Route
             path="/activity/:id"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.TEACHER]}>
                 <ActivityDetail />
               </ProtectedRoute>
             }

@@ -4,9 +4,6 @@ import { useAuth } from '../../context/AuthContext';
 import {
     FaHome,
     FaUser,
-    FaPlus,
-    FaList,
-    FaGlobe,
     FaSignOutAlt,
     FaBars,
     FaTimes
@@ -18,11 +15,8 @@ export const StudentLayout: React.FC = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     const menuItems = [
-        { path: '/student/dashboard', icon: FaHome, label: 'Dashboard' },
-        { path: '/student/profile', icon: FaUser, label: 'My Profile' },
-        { path: '/generate', icon: FaPlus, label: 'Generate Activity' },
-        { path: '/my-activities', icon: FaList, label: 'My Activities' },
-        { path: '/public-activities', icon: FaGlobe, label: 'Public Activities' },
+        { path: '/student/dashboard', label: 'Dashboard', icon: FaHome },
+        { path: '/student/profile', label: 'Profile', icon: FaUser },
     ];
 
     const isActive = (path: string) => location.pathname === path;

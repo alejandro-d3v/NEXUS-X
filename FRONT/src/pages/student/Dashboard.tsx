@@ -1,26 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { activityService } from '../../services/activity.service';
-import { Activity } from '../../types';
-import { FaUser, FaGraduationCap, FaPlus, FaList, FaGlobe, FaChalkboardTeacher } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { FaUser, FaGraduationCap, FaChalkboardTeacher, FaSpinner, FaEye } from 'react-icons/fa';
+import api from '../../services/api';
+
+interface Activity {
+    id: string;
+    title: string;
+    description?: string;
+    type: string;
+    subject: string;
+    createdAt: string;
+    user: {
+        firstName: string;
+        lastName: string;
+    };
+}
 
 export const StudentDashboard: React.FC = () => {
     const { user } = useAuth();
-    const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
+    const navigate = useNavigate();
+    const [courseActivities, setCourseActivities] = useState<Activity[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchRecentActivities();
+        fetchCourseActivities();
     }, []);
 
-    const fetchRecentActivities = async () => {
+    const fetchCourseActivities = async () => {
         try {
-            const activities = await activityService.getMyActivities();
-            setRecentActivities(activities.slice(0, 5));
-        } catch (error) {
-            toast.error('Error loading activities');
+            setLoading(true);
+            // Get activities assigned to student's grade
+            const response = await api.get('/activities/student');
+            setCourseActivities(response.data);
+        } catch (error: any) {
+            toast.error('Error al cargar actividades');
+            console.error(error);
         } finally {
             setLoading(false);
         }
@@ -85,7 +101,7 @@ export const StudentDashboard: React.FC = () => {
                 <div className="info-card">
                     <div className="info-card-header">
                         <FaGraduationCap className="info-card-icon" style={{ color: '#3b82f6' }} />
-                        <h3>My Grade</h3>
+                        <h3>My Course</h3>
                     </div>
                     <div className="info-card-body">
                         {grade ? (
@@ -117,77 +133,80 @@ export const StudentDashboard: React.FC = () => {
                             </>
                         ) : (
                             <p style={{ color: '#999', textAlign: 'center', padding: '1rem' }}>
-                                No grade assigned yet
+                                No course assigned yet. Please contact your administrator.
                             </p>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="section-card" style={{ marginTop: '2rem' }}>
-                <h2>Quick Actions</h2>
-                <div className="quick-actions">
-                    <Link to="/generate" className="action-card">
-                        <FaPlus className="action-icon" />
-                        <h3>Generate Activity</h3>
-                        <p>Create a new learning activity</p>
-                    </Link>
-                    <Link to="/my-activities" className="action-card">
-                        <FaList className="action-icon" />
-                        <h3>My Activities</h3>
-                        <p>View your created activities</p>
-                    </Link>
-                    <Link to="/public-activities" className="action-card">
-                        <FaGlobe className="action-icon" />
-                        <h3>Public Activities</h3>
-                        <p>Browse community activities</p>
-                    </Link>
-                </div>
-            </div>
-
-            {/* Recent Activities */}
+            {/* Course Activities */}
             <div className="section-card" style={{ marginTop: '2rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <h2>Recent Activities</h2>
-                    <Link to="/my-activities" className="btn btn-primary">
-                        View All
-                    </Link>
+                    <h2>📚 My Course Activities</h2>
+                    {courseActivities.length > 0 && (
+                        <span className="badge badge-blue" style={{ fontSize: '1rem', padding: '0.5rem 1rem' }}>
+                            {courseActivities.length} {courseActivities.length === 1 ? 'Activity' : 'Activities'}
+                        </span>
+                    )}
                 </div>
 
-                {loading ? (
-                    <p>Loading activities...</p>
-                ) : recentActivities.length === 0 ? (
+                {!grade ? (
+                    <div className="empty-state">
+                        <FaGraduationCap size={48} color="#ccc" />
+                        <p>You are not enrolled in any course yet</p>
+                        <p style={{ color: '#999', fontSize: '0.9rem' }}>
+                            Please contact your teacher or administrator to join a course
+                        </p>
+                    </div>
+                ) : loading ? (
+                    <div style={{ textAlign: 'center', padding: '3rem' }}>
+                        <FaSpinner className="spinner" size={32} />
+                        <p style={{ marginTop: '1rem', color: '#666' }}>Loading activities...</p>
+                    </div>
+                ) : courseActivities.length === 0 ? (
                     <div className="empty-state">
                         <FaChalkboardTeacher size={48} color="#ccc" />
-                        <p>No activities yet</p>
-                        <Link to="/generate" className="btn btn-primary">
-                            Create Your First Activity
-                        </Link>
+                        <p>No activities assigned yet</p>
+                        <p style={{ color: '#999', fontSize: '0.9rem' }}>
+                            Your teacher hasn't assigned any activities to your course yet
+                        </p>
                     </div>
                 ) : (
-                    <div className="activities-list">
-                        {recentActivities.map((activity) => (
-                            <Link
-                                key={activity.id}
-                                to={`/activity/${activity.id}`}
-                                className="activity-item"
-                            >
-                                <div className="activity-item-header">
-                                    <h4>{activity.title}</h4>
-                                    <span className="badge badge-success">
-                                        Activity
+                    <div className="activities-grid">
+                        {courseActivities.map((activity) => (
+                            <div key={activity.id} className="activity-card">
+                                <div className="activity-card-header">
+                                    <h3>{activity.title}</h3>
+                                    <div className="activity-badges">
+                                        <span className="badge badge-blue">{activity.type}</span>
+                                        <span className="badge badge-gray">{activity.subject}</span>
+                                    </div>
+                                </div>
+
+                                {activity.description && (
+                                    <p className="activity-description">{activity.description}</p>
+                                )}
+
+                                <div className="activity-meta">
+                                    <span className="teacher">
+                                        👨‍🏫 {activity.user.firstName} {activity.user.lastName}
+                                    </span>
+                                    <span className="date">
+                                        {new Date(activity.createdAt).toLocaleDateString()}
                                     </span>
                                 </div>
-                                <p className="activity-item-description">
-                                    {activity.description || 'No description'}
-                                </p>
-                                <div className="activity-item-footer">
-                                    <span className="activity-meta">
-                                        Created: {new Date(activity.createdAt).toLocaleDateString()}
-                                    </span>
+
+                                <div className="activity-actions">
+                                    <button
+                                        onClick={() => navigate(`/student/activities/${activity.id}`)}
+                                        className="btn btn-sm btn-primary"
+                                        style={{ width: '100%' }}
+                                    >
+                                        <FaEye /> View Activity
+                                    </button>
                                 </div>
-                            </Link>
+                            </div>
                         ))}
                     </div>
                 )}

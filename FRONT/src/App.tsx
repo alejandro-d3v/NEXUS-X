@@ -9,7 +9,6 @@ import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { GenerateActivity } from './pages/GenerateActivity';
 import { PublicActivities } from './pages/PublicActivities';
-import { JoinCourse } from './pages/JoinCourse';
 import { WelcomeCourse } from './pages/WelcomeCourse';
 import { UserRole } from './types';
 
@@ -34,6 +33,7 @@ import { StudentLayout } from './components/layouts/StudentLayout';
 import { StudentDashboard } from './pages/student/Dashboard';
 import { StudentProfile } from './pages/student/Profile';
 import { StudentActivityDetail } from './pages/student/StudentActivityDetail';
+import { JoinCourse } from './pages/student/JoinCourse';
 
 const DashboardRedirect = () => {
   const { user } = useAuth();
@@ -127,6 +127,7 @@ function App() {
             }
           >
             <Route path="dashboard" element={<StudentDashboard />} />
+            <Route path="join-course" element={<JoinCourse />} />
             <Route path="profile" element={<StudentProfile />} />
             <Route path="activities/:id" element={<StudentActivityDetail />} />
           </Route>

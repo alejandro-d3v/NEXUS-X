@@ -22,6 +22,11 @@ export const gradeService = {
         return response.data;
     },
 
+    async getMyGrades(): Promise<Grade[]> {
+        const response = await api.get('/grades/my-grades');
+        return response.data;
+    },
+
     async getById(id: string): Promise<Grade> {
         const response = await api.get(`/grades/${id}`);
         return response.data;

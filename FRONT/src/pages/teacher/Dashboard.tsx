@@ -25,18 +25,12 @@ export const TeacherDashboard: React.FC = () => {
     const fetchDashboardData = async () => {
         try {
             const [gradesData, invitationsData] = await Promise.all([
-                gradeService.getAll(),
+                gradeService.getMyGrades(), // Only get grades where current user is the teacher
                 invitationService.getMyCodes(),
             ]);
 
-            // Filter grades where current user is the teacher
-            // Note: We need to get teacher profile first to match teacherId
-            const teacherGrades = gradesData.filter(
-                (grade: Grade) => grade.teacher?.id
-            );
-
-            // Calculate total students across all grades
-            const totalStudents = teacherGrades.reduce(
+            // Calculate total students across all my grades
+            const totalStudents = gradesData.reduce(
                 (sum: number, grade: Grade) => sum + (grade._count?.students || 0),
                 0
             );
@@ -47,12 +41,12 @@ export const TeacherDashboard: React.FC = () => {
             ).length;
 
             setStats({
-                totalGrades: teacherGrades.length,
+                totalGrades: gradesData.length,
                 totalStudents,
                 activeInvitations,
             });
 
-            setMyGrades(teacherGrades);
+            setMyGrades(gradesData);
         } catch (error) {
             toast.error('Error loading dashboard data');
             console.error(error);

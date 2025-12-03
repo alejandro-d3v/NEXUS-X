@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
     FaHome,
     FaUser,
+    FaTicketAlt,
     FaSignOutAlt,
     FaBars,
     FaTimes
@@ -16,6 +17,7 @@ export const StudentLayout: React.FC = () => {
 
     const menuItems = [
         { path: '/student/dashboard', label: 'Dashboard', icon: FaHome },
+        { path: '/student/join-course', label: 'Join Course', icon: FaTicketAlt },
         { path: '/student/profile', label: 'Profile', icon: FaUser },
     ];
 

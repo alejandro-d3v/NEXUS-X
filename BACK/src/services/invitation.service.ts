@@ -304,67 +304,49 @@ class InvitationService {
                 throw new BadRequestError('Only students can join courses');
             }
 
-            // Check if already enrolled in this grade
-            if (user.studentProfile && user.studentProfile.gradeId === grade!.id) {
+            // Check if already enrolled in this grade via StudentGrade
+            const existingEnrollment = await prisma.studentGrade.findUnique({
+                where: {
+                    studentId_gradeId: {
+                        studentId: user.studentProfile!.id,
+                        gradeId: grade!.id,
+                    },
+                },
+            });
+
+            if (existingEnrollment) {
                 throw new BadRequestError('You are already enrolled in this grade');
             }
 
-            // If student profile exists but different grade, update it
-            // If no student profile, create one
-            let studentProfile;
-            if (user.studentProfile) {
-                studentProfile = await prisma.studentProfile.update({
-                    where: { userId: user.id },
-                    data: {
-                        gradeId: grade!.id,
-                        institutionId: institution!.id,
-                    },
-                    include: {
-                        grade: {
-                            include: {
-                                institution: true,
-                                teacher: {
-                                    include: {
-                                        user: {
-                                            select: {
-                                                firstName: true,
-                                                lastName: true,
-                                                email: true,
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                        institution: true,
-                    },
-                });
-            } else {
-                studentProfile = await prisma.studentProfile.create({
+            // Create StudentGrade enrollment (allows multiple courses)
+            await prisma.studentGrade.create({
+                data: {
+                    studentId: user.studentProfile!.id,
+                    gradeId: grade!.id,
+                    isActive: true,
+                },
+            });
+
+            // If no student profile exists, create one
+            if (!user.studentProfile) {
+                await prisma.studentProfile.create({
                     data: {
                         userId: user.id,
                         institutionId: institution!.id,
-                        gradeId: grade!.id,
-                        studentId: `STU-${Date.now()}`, // Auto-generate student ID
+                        studentId: `STU-${Date.now()}`,
                     },
-                    include: {
-                        grade: {
-                            include: {
-                                institution: true,
-                                teacher: {
-                                    include: {
-                                        user: {
-                                            select: {
-                                                firstName: true,
-                                                lastName: true,
-                                                email: true,
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                        institution: true,
+                });
+
+                // Create the StudentGrade enrollment
+                const newStudentProfile = await prisma.studentProfile.findUnique({
+                    where: { userId: user.id },
+                });
+
+                await prisma.studentGrade.create({
+                    data: {
+                        studentId: newStudentProfile!.id,
+                        gradeId: grade!.id,
+                        isActive: true,
                     },
                 });
             }
@@ -375,15 +357,43 @@ class InvitationService {
                 data: { usedCount: { increment: 1 } },
             });
 
+            // Get final student profile with all grades
+            const finalProfile = await prisma.studentProfile.findUnique({
+                where: { userId: user.id },
+                include: {
+                    grades: {
+                        include: {
+                            grade: {
+                                include: {
+                                    institution: true,
+                                    teacher: {
+                                        include: {
+                                            user: {
+                                                select: {
+                                                    firstName: true,
+                                                    lastName: true,
+                                                    email: true,
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    institution: true,
+                },
+            });
+
             const { password: _, ...userWithoutPassword } = user;
 
             return {
                 success: true,
                 message: `Successfully enrolled in ${grade!.name}`,
                 user: userWithoutPassword,
-                studentProfile,
-                grade: studentProfile.grade,
-                institution: studentProfile.institution,
+                studentProfile: finalProfile,
+                grade: grade,
+                institution: institution,
             };
         }
 
@@ -416,24 +426,42 @@ class InvitationService {
                 },
             });
 
+            // Create student profile
             const studentProfile = await tx.studentProfile.create({
                 data: {
                     userId: newUser.id,
                     institutionId: institution!.id,
-                    gradeId: grade!.id,
                     studentId: `STU-${Date.now()}`, // Auto-generate student ID
                 },
+            });
+
+            // Create StudentGrade enrollment
+            await tx.studentGrade.create({
+                data: {
+                    studentId: studentProfile.id,
+                    gradeId: grade!.id,
+                    isActive: true,
+                },
+            });
+
+            // Get student profile with grades
+            const studentProfileWithGrades = await tx.studentProfile.findUnique({
+                where: { id: studentProfile.id },
                 include: {
-                    grade: {
+                    grades: {
                         include: {
-                            institution: true,
-                            teacher: {
+                            grade: {
                                 include: {
-                                    user: {
-                                        select: {
-                                            firstName: true,
-                                            lastName: true,
-                                            email: true,
+                                    institution: true,
+                                    teacher: {
+                                        include: {
+                                            user: {
+                                                select: {
+                                                    firstName: true,
+                                                    lastName: true,
+                                                    email: true,
+                                                },
+                                            },
                                         },
                                     },
                                 },
@@ -449,7 +477,7 @@ class InvitationService {
                 data: { usedCount: { increment: 1 } },
             });
 
-            return { user: newUser, studentProfile };
+            return { user: newUser, studentProfile: studentProfileWithGrades };
         });
 
         // Generate JWT token for auto-login
@@ -466,8 +494,8 @@ class InvitationService {
             message: `Account created successfully! Welcome to ${grade!.name}!`,
             user: userWithoutPassword,
             studentProfile: result.studentProfile,
-            grade: result.studentProfile.grade,
-            institution: result.studentProfile.institution,
+            grade: grade,
+            institution: institution,
             token, // Return token for auto-login
         };
     }

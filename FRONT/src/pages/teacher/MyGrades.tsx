@@ -29,14 +29,11 @@ export const MyGrades: React.FC = () => {
     const fetchData = async () => {
         try {
             const [gradesData, institutionsData] = await Promise.all([
-                gradeService.getAll(),
+                gradeService.getMyGrades(), // Only get my grades
                 institutionService.getAll(),
             ]);
 
-            // Filter only grades where current user is the teacher
-            const myGrades = gradesData.filter((grade: Grade) => grade.teacher?.id);
-
-            setGrades(myGrades);
+            setGrades(gradesData);
             setInstitutions(institutionsData);
         } catch (error) {
             toast.error('Error loading data');

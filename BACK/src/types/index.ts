@@ -143,7 +143,7 @@ export interface AIGenerationRequest {
   provider: AIProvider;
   type: ActivityType;
   subject: string;
-  grade: string;
+  grade?: string; // Now optional
   additionalParams?: ExamParams | Record<string, any>;
 }
 

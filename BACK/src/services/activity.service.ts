@@ -9,7 +9,6 @@ class ActivityService {
     visibility: ActivityVisibility;
     content: any;
     subject: string;
-    grade: string;
     aiProvider: AIProvider;
     creditCost: number;
     userId: string;
@@ -23,6 +22,17 @@ class ActivityService {
             firstName: true,
             lastName: true,
             email: true,
+          },
+        },
+        activityGrades: {
+          include: {
+            grade: {
+              select: {
+                id: true,
+                name: true,
+                subject: true,
+              },
+            },
           },
         },
       },
@@ -39,6 +49,18 @@ class ActivityService {
             firstName: true,
             lastName: true,
             email: true,
+          },
+        },
+        activityGrades: {
+          include: {
+            grade: {
+              select: {
+                id: true,
+                name: true,
+                subject: true,
+                level: true,
+              },
+            },
           },
         },
       },
@@ -58,14 +80,12 @@ class ActivityService {
   async getUserActivities(userId: string, filters?: {
     type?: ActivityType;
     subject?: string;
-    grade?: string;
   }) {
     return await prisma.activity.findMany({
       where: {
         userId,
         ...(filters?.type && { type: filters.type }),
         ...(filters?.subject && { subject: filters.subject }),
-        ...(filters?.grade && { grade: filters.grade }),
       },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -76,6 +96,16 @@ class ActivityService {
             lastName: true,
           },
         },
+        activityGrades: {
+          include: {
+            grade: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -83,14 +113,12 @@ class ActivityService {
   async getPublicActivities(filters?: {
     type?: ActivityType;
     subject?: string;
-    grade?: string;
   }) {
     return await prisma.activity.findMany({
       where: {
         visibility: ActivityVisibility.PUBLIC,
         ...(filters?.type && { type: filters.type }),
         ...(filters?.subject && { subject: filters.subject }),
-        ...(filters?.grade && { grade: filters.grade }),
       },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -99,6 +127,16 @@ class ActivityService {
             id: true,
             firstName: true,
             lastName: true,
+          },
+        },
+        activityGrades: {
+          include: {
+            grade: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
         },
       },
@@ -144,6 +182,113 @@ class ActivityService {
     await prisma.activity.delete({
       where: { id },
     });
+  }
+
+  // New methods for grade assignment
+  async assignToGrades(activityId: string, gradeIds: string[], assignedBy: string) {
+    const activity = await prisma.activity.findUnique({
+      where: { id: activityId },
+    });
+
+    if (!activity) {
+      throw new Error('Activity not found');
+    }
+
+    // Check permissions: owner can assign, or public activities can be assigned by any teacher
+    if (activity.visibility === ActivityVisibility.PRIVATE && activity.userId !== assignedBy) {
+      throw new Error('Cannot assign private activities from other teachers');
+    }
+
+    // Create ActivityGrade entries
+    const assignments = await Promise.all(
+      gradeIds.map(gradeId =>
+        prisma.activityGrade.upsert({
+          where: {
+            activityId_gradeId: {
+              activityId,
+              gradeId,
+            },
+          },
+          create: {
+            activityId,
+            gradeId,
+            assignedBy,
+          },
+          update: {
+            assignedBy,
+            assignedAt: new Date(),
+          },
+        })
+      )
+    );
+
+    return assignments;
+  }
+
+  async unassignFromGrade(activityId: string, gradeId: string, userId: string) {
+    const activity = await prisma.activity.findUnique({
+      where: { id: activityId },
+    });
+
+    if (!activity) {
+      throw new Error('Activity not found');
+    }
+
+    // Only owner can unassign
+    if (activity.userId !== userId) {
+      throw new Error('Access denied');
+    }
+
+    await prisma.activityGrade.delete({
+      where: {
+        activityId_gradeId: {
+          activityId,
+          gradeId,
+        },
+      },
+    });
+  }
+
+  async getActivitiesByGrade(gradeId: string) {
+    const activityGrades = await prisma.activityGrade.findMany({
+      where: { gradeId },
+      include: {
+        activity: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        assignedAt: 'desc',
+      },
+    });
+
+    return activityGrades.map(ag => ({
+      ...ag.activity,
+      assignedAt: ag.assignedAt,
+      assignedBy: ag.assignedBy,
+    }));
+  }
+
+  async getStudentActivities(userId: string) {
+    // Get student's grade
+    const student = await prisma.studentProfile.findUnique({
+      where: { userId },
+      select: { gradeId: true },
+    });
+
+    if (!student || !student.gradeId) {
+      return [];
+    }
+
+    return await this.getActivitiesByGrade(student.gradeId);
   }
 }
 

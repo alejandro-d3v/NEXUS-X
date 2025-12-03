@@ -8,9 +8,7 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { GenerateActivity } from './pages/GenerateActivity';
-import { MyActivities } from './pages/MyActivities';
 import { PublicActivities } from './pages/PublicActivities';
-import { ActivityDetail } from './pages/ActivityDetail';
 import { JoinCourse } from './pages/JoinCourse';
 import { WelcomeCourse } from './pages/WelcomeCourse';
 import { UserRole } from './types';
@@ -24,8 +22,12 @@ import { GradeManagement } from './pages/admin/GradeManagement';
 // Teacher pages
 import { TeacherDashboard } from './pages/teacher/Dashboard';
 import { MyGrades } from './pages/teacher/MyGrades';
-import { Invitations } from './pages/teacher/Invitations';
 import { StudentRoster } from './pages/teacher/StudentRoster';
+import { Invitations } from './pages/teacher/Invitations';
+import { CreateSummary } from './pages/teacher/CreateSummary';
+import { AssignActivity } from './pages/teacher/AssignActivity';
+import { MyActivities } from './pages/teacher/MyActivities';
+import { ActivityDetail } from './pages/teacher/ActivityDetail';
 
 // Student pages
 import { StudentLayout } from './components/layouts/StudentLayout';
@@ -106,8 +108,12 @@ function App() {
           >
             <Route path="dashboard" element={<TeacherDashboard />} />
             <Route path="grades" element={<MyGrades />} />
+            <Route path="activities" element={<MyActivities />} />
+            <Route path="activities/:id" element={<ActivityDetail />} />
             <Route path="invitations" element={<Invitations />} />
             <Route path="students" element={<StudentRoster />} />
+            <Route path="create-summary" element={<CreateSummary />} />
+            <Route path="activities/:id/assign" element={<AssignActivity />} />
           </Route>
 
           {/* Student Routes with Layout */}

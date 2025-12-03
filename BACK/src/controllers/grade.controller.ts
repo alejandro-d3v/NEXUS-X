@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import gradeService from '../services/grade.service';
+import prisma from '../config/database';
 
 export const createGrade = async (req: AuthRequest, res: Response) => {
     try {
@@ -105,6 +106,35 @@ export const getGradeStudents = async (req: AuthRequest, res: Response) => {
         const students = await gradeService.getGradeStudents(id);
 
         res.json(students);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const getMyGrades = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?.userId;
+        if (!userId) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
+
+        // Get teacher profile for this user
+        const teacherProfile = await prisma.teacherProfile.findUnique({
+            where: { userId },
+        });
+
+        if (!teacherProfile) {
+            res.status(404).json({ error: 'Teacher profile not found' });
+            return;
+        }
+
+        // Get grades for this teacher
+        const grades = await gradeService.getAllGrades({
+            teacherId: teacherProfile.id,
+        });
+
+        res.json(grades);
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }

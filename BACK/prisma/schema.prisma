@@ -51,10 +51,11 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relationships
-  activities     Activity[]
-  creditHistory  CreditHistory[]
-  studentProfile StudentProfile?
-  teacherProfile TeacherProfile?
+  activities         Activity[]
+  creditHistory      CreditHistory[]
+  studentProfile     StudentProfile?
+  teacherProfile     TeacherProfile?
+  assignedActivities ActivityGrade[] // Activities assigned by this user
 
   @@index([email])
   @@index([role])
@@ -68,7 +69,6 @@ model Activity {
   visibility  ActivityVisibility @default(PRIVATE)
   content     Json
   subject     String
-  grade       String
   aiProvider  AIProvider
   creditCost  Int
   userId      String
@@ -76,11 +76,33 @@ model Activity {
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 
+  // Many-to-many relationship with grades
+  activityGrades ActivityGrade[]
+
   @@index([userId])
   @@index([type])
   @@index([visibility])
   @@index([subject])
   @@index([createdAt])
+}
+
+// Junction table for Activity-Grade many-to-many relationship
+model ActivityGrade {
+  id         String   @id @default(uuid())
+  activityId String
+  gradeId    String
+  assignedBy String // Teacher who assigned the activity to this grade
+  assignedAt DateTime @default(now())
+
+  // Relationships
+  activity       Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  grade          Grade    @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  assignedByUser User     @relation(fields: [assignedBy], references: [id])
+
+  @@unique([activityId, gradeId])
+  @@index([activityId])
+  @@index([gradeId])
+  @@index([assignedBy])
 }
 
 model CreditHistory {
@@ -136,6 +158,7 @@ model Grade {
   teacher         TeacherProfile   @relation(fields: [teacherId], references: [id], onDelete: Restrict)
   students        StudentProfile[]
   invitationCodes InvitationCode[]
+  activityGrades  ActivityGrade[] // Activities assigned to this grade
 
   @@index([institutionId])
   @@index([teacherId])

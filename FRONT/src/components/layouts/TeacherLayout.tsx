@@ -6,6 +6,7 @@ import {
     FaGraduationCap,
     FaTicketAlt,
     FaUsers,
+    FaClipboardList,
     FaSignOutAlt,
     FaBars,
     FaTimes
@@ -19,6 +20,7 @@ export const TeacherLayout: React.FC = () => {
     const menuItems = [
         { path: '/teacher/dashboard', icon: FaHome, label: 'Dashboard' },
         { path: '/teacher/grades', icon: FaGraduationCap, label: 'My Grades' },
+        { path: '/teacher/activities', icon: FaClipboardList, label: 'Activities' },
         { path: '/teacher/invitations', icon: FaTicketAlt, label: 'Invitations' },
         { path: '/teacher/students', icon: FaUsers, label: 'Students' },
     ];

@@ -7,6 +7,7 @@ import {
     deleteGrade,
     assignTeacher,
     getGradeStudents,
+    getMyGrades,
 } from '../controllers/grade.controller';
 import { authenticate, authorize } from '../middlewares/auth.middleware';
 import { UserRole } from '../types';
@@ -18,6 +19,7 @@ const router = Router();
 // Only ADMIN can delete grades
 router.post('/', authenticate, authorize(UserRole.ADMIN, UserRole.TEACHER), createGrade);
 router.get('/', authenticate, getAllGrades);
+router.get('/my-grades', authenticate, authorize(UserRole.TEACHER), getMyGrades);
 router.get('/:id', authenticate, getGradeById);
 router.put('/:id', authenticate, authorize(UserRole.ADMIN, UserRole.TEACHER), updateGrade);
 router.delete('/:id', authenticate, authorize(UserRole.ADMIN), deleteGrade);

@@ -16,6 +16,7 @@ export enum ActivityType {
   GAME = 'GAME',
   CHATBOT = 'CHATBOT',
   WRITING_CORRECTION = 'WRITING_CORRECTION',
+  FLASHCARDS = 'FLASHCARDS',
 }
 
 export enum ActivityVisibility {
@@ -83,7 +84,7 @@ export interface AIGenerationRequest {
   type: ActivityType;
   subject: string;
   grade: string;
-  additionalParams?: ExamParams | Record<string, any>;
+  additionalParams?: ExamParams | FlashcardParams | Record<string, any>;
   pdfContext?: string;
   pdfFileName?: string;
 }
@@ -100,6 +101,15 @@ export interface ExamParams {
   cantidadOM?: number;
   cantidadVF?: number;
   instruccionesAdicionales?: string;
+}
+
+export interface FlashcardParams {
+  titulo?: string;
+  descripcion?: string;
+  nivelEducativo?: string;
+  cantidadTarjetas?: number;
+  tipo?: string;
+  estilo?: string;
 }
 
 export interface AIGenerationResponse {

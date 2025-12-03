@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "titulo": "",
+    "descripcion": "",
+    "nivel_educativo": "",
+    "cantidad_tarjetas": 0,
+    "tipo": "",
+    "estilo": ""
+  },
+  "tarjetas": [
+    {
+      "id": 1,
+      "frente": "",
+      "reverso": "",
+      "categoria": ""
+    }
+  ]
+}

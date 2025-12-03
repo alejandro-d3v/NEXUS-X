@@ -70,8 +70,18 @@ export const Dashboard: React.FC = () => {
             <p style={styles.toolDescription}>Crea rúbricas de evaluación</p>
           </Link>
 
+          {/* Flashcards Generator - Special Link */}
+          <Link
+            to="/generate-flashcards"
+            style={styles.toolCard}
+          >
+            <div style={styles.toolIcon}>🎴</div>
+            <h3 style={styles.toolName}>Tarjetas de Estudio</h3>
+            <p style={styles.toolDescription}>Genera flashcards para estudiar</p>
+          </Link>
+
           {/* Other tools */}
-          {tools.slice(3).map((tool) => (
+          {tools.slice(4).map((tool) => (
             <Link
               key={tool.type}
               to={`/generate?type=${tool.type}`}

@@ -9,6 +9,7 @@ import { GenerateActivity } from './pages/GenerateActivity';
 import { GenerateExam } from './pages/GenerateExam';
 import { GenerateSummary } from './pages/GenerateSummary';
 import { GenerateRubric } from './pages/GenerateRubric';
+import { GenerateFlashcards } from './pages/GenerateFlashcards';
 import { MyActivities } from './pages/MyActivities';
 import { PublicActivities } from './pages/PublicActivities';
 import { ActivityDetail } from './pages/ActivityDetail';
@@ -57,6 +58,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <GenerateRubric />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/generate-flashcards"
+            element={
+              <ProtectedRoute>
+                <GenerateFlashcards />
               </ProtectedRoute>
             }
           />

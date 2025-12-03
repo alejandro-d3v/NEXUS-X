@@ -22,6 +22,8 @@ class OpenAIService {
       let userPrompt = request.prompt;
       if (request.type === 'EXAM' && request.additionalParams) {
         userPrompt = this.buildExamPrompt(request);
+      } else if (request.type === 'FLASHCARDS' && request.additionalParams) {
+        userPrompt = this.buildFlashcardsPrompt(request);
       }
 
       const completion = await this.client.chat.completions.create({
@@ -49,7 +51,7 @@ class OpenAIService {
 
   private buildExamPrompt(request: AIGenerationRequest): string {
     const examTemplate = require('../templates/exam.json');
-    const params = request.additionalParams || {};
+    const params = (request.additionalParams || {}) as any;
 
     // Construir el contexto base
     let contextualPrompt = '';
@@ -115,6 +117,52 @@ ${params.instruccionesAdicionales || ''}
     `.trim();
   }
 
+  private buildFlashcardsPrompt(request: AIGenerationRequest): string {
+    const flashcardTemplate = require('../templates/flashcard.json');
+    const params = (request.additionalParams || {}) as any;
+
+    return `
+Genera tarjetas de estudio (flashcards) en formato JSON utilizando la siguiente estructura fija:
+
+${JSON.stringify(flashcardTemplate, null, 2)}
+
+Rellena todos los campos con contenido original y educativo.
+
+### Contexto:
+${request.prompt}
+
+### Parámetros de las tarjetas:
+
+Título: ${params.titulo || request.prompt}
+Descripción: ${params.descripcion || ''}
+Nivel educativo: ${params.nivelEducativo || request.grade}
+Cantidad de tarjetas: ${params.cantidadTarjetas || 10}
+Tipo: ${params.tipo || 'Definiciones'}
+Estilo: ${params.estilo || 'Conciso'}
+
+### Reglas:
+
+- Usa exclusivamente la estructura JSON proporcionada.
+- No cambies nombres de claves.
+- No añadas campos nuevos.
+- Cada tarjeta debe tener:
+  * "frente": Pregunta, término o concepto
+  * "reverso": Respuesta, definición o explicación
+  * "categoria": (opcional) Categoría temática
+- El contenido debe ser apropiado al nivel educativo indicado.
+- Para tipo "Vocabulario": frente = palabra, reverso = definición + ejemplo.
+- Para tipo "Preguntas y Respuestas": frente = pregunta, reverso = respuesta completa.
+- Para tipo "Definiciones": frente = término, reverso = definición clara.
+- Para tipo "Conceptos": frente = concepto, reverso = explicación detallada.
+- Para tipo "Fórmulas": frente = nombre de fórmula, reverso = fórmula + explicación.
+- Si el estilo es "Conciso": respuestas breves y directas.
+- Si el estilo es "Detallado": respuestas más completas con ejemplos.
+- Si el estilo es "Visual": incluir descripciones que ayuden a visualizar.
+- Todas las tarjetas deben estar numeradas correctamente (1, 2, 3, etc.).
+- No escribas explicación fuera del JSON, solo JSON puro.
+    `.trim();
+  }
+
   private getSystemPrompt(type: string): string {
     const prompts: Record<string, string> = {
       EXAM: 'Eres un asistente educativo experto en crear exámenes. Genera contenido en formato JSON con preguntas, opciones y respuestas correctas. Sigue estrictamente la estructura JSON proporcionada. Responde únicamente con JSON válido y nada más. No cambies nombres de claves. No añadas campos nuevos.',
@@ -128,6 +176,7 @@ ${params.instruccionesAdicionales || ''}
       GAME: 'Eres un asistente educativo experto en crear juegos educativos. Genera contenido de juego en formato JSON.',
       CHATBOT: 'Eres un asistente educativo experto en la materia solicitada. Responde de manera clara y pedagógica en formato JSON.',
       WRITING_CORRECTION: 'Eres un asistente educativo experto en corrección de escritura. Analiza y corrige el texto en formato JSON.',
+      FLASHCARDS: 'Eres un asistente educativo experto en crear tarjetas de estudio (flashcards). Genera tarjetas educativas en formato JSON. Sigue estrictamente la estructura JSON proporcionada. Responde únicamente con JSON válido y nada más. No cambies nombres de claves. No añadas campos nuevos.',
     };
 
     return prompts[type] || 'Eres un asistente educativo. Genera contenido en formato JSON.';

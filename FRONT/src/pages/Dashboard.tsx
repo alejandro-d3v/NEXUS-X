@@ -80,8 +80,28 @@ export const Dashboard: React.FC = () => {
             <p style={styles.toolDescription}>Genera flashcards para estudiar</p>
           </Link>
 
+          {/* Essay Generator - Special Link */}
+          <Link
+            to="/generate-essay"
+            style={styles.toolCard}
+          >
+            <div style={styles.toolIcon}>✍️</div>
+            <h3 style={styles.toolName}>Generador de Ensayos</h3>
+            <p style={styles.toolDescription}>Crea ensayos académicos</p>
+          </Link>
+
+          {/* Game Generator - Special Link */}
+          <Link
+            to="/generate-game"
+            style={styles.toolCard}
+          >
+            <div style={styles.toolIcon}>🎮</div>
+            <h3 style={styles.toolName}>Juegos Educativos</h3>
+            <p style={styles.toolDescription}>Sopa de letras y crucigramas</p>
+          </Link>
+
           {/* Other tools */}
-          {tools.slice(4).map((tool) => (
+          {tools.slice(6).map((tool) => (
             <Link
               key={tool.type}
               to={`/generate?type=${tool.type}`}

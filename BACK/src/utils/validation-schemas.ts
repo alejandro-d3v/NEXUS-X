@@ -30,7 +30,9 @@ export const generateActivitySchema = Joi.object({
     'LESSON_PLAN',
     'GAME',
     'CHATBOT',
-    'WRITING_CORRECTION'
+    'WRITING_CORRECTION',
+    'FLASHCARDS',
+    'ESSAY'
   ).required(),
   subject: Joi.string().optional().allow(''),
   grade: Joi.string().optional().allow(''),
@@ -56,6 +58,18 @@ export const generateActivitySchema = Joi.object({
     numeroCriterios: Joi.number().optional(),
     numeroNiveles: Joi.number().optional(),
     puntajeMaximo: Joi.number().optional(),
+    // Flashcards-specific fields
+    cantidadTarjetas: Joi.number().optional(),
+    tipo: Joi.string().optional(),
+    estilo: Joi.string().optional(),
+    // Essay-specific fields
+    tema: Joi.string().optional(),
+    numeroPaginas: Joi.number().optional(),
+    tipoEnsayo: Joi.string().optional(),
+    formatoCitas: Joi.string().optional(),
+    // Game-specific fields
+    tipoJuego: Joi.string().optional(),
+    numeroPalabras: Joi.number().optional(),
   }).optional(),
 });
 

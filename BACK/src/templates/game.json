@@ -1,0 +1,14 @@
+{
+    "meta": {
+        "titulo": "",
+        "tipo": "sopa_letras",
+        "nivel_educativo": "",
+        "numero_palabras": 0
+    },
+    "grid": [],
+    "palabras": [],
+    "pistas": {
+        "horizontal": [],
+        "vertical": []
+    }
+}

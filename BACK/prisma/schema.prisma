@@ -25,6 +25,8 @@ enum ActivityType {
   GAME
   CHATBOT
   WRITING_CORRECTION
+  FLASHCARDS
+  ESSAY
 }
 
 enum ActivityVisibility {

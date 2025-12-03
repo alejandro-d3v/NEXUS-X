@@ -10,6 +10,8 @@ import { GenerateExam } from './pages/GenerateExam';
 import { GenerateSummary } from './pages/GenerateSummary';
 import { GenerateRubric } from './pages/GenerateRubric';
 import { GenerateFlashcards } from './pages/GenerateFlashcards';
+import { GenerateEssay } from './pages/GenerateEssay';
+import { GenerateGame } from './pages/GenerateGame';
 import { MyActivities } from './pages/MyActivities';
 import { PublicActivities } from './pages/PublicActivities';
 import { ActivityDetail } from './pages/ActivityDetail';
@@ -66,6 +68,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <GenerateFlashcards />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/generate-essay"
+            element={
+              <ProtectedRoute>
+                <GenerateEssay />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/generate-game"
+            element={
+              <ProtectedRoute>
+                <GenerateGame />
               </ProtectedRoute>
             }
           />

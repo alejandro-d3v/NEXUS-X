@@ -48,6 +48,8 @@ class GeminiService {
       CHATBOT: 'Eres un asistente educativo experto en la materia solicitada. Responde de manera clara y pedagógica en formato JSON.',
       WRITING_CORRECTION: 'Eres un asistente educativo experto en corrección de escritura. Analiza y corrige el texto en formato JSON.',
       FLASHCARDS: 'Eres un asistente educativo experto en crear tarjetas de estudio (flashcards). Genera tarjetas educativas en formato JSON con un campo "frente" y un campo "reverso" para cada tarjeta. Cada tarjeta debe tener contenido claro y educativo apropiado para el nivel indicado.',
+      ESSAY: 'Eres un asistente educativo experto en redacción académica y ensayos. Genera ensayos bien estructurados y coherentes en formato JSON con introducción, desarrollo y conclusión.',
+      GAME: 'Eres un asistente educativo experto en crear juegos educativos como sopas de letras y crucigramas. Genera juegos en formato JSON con las palabras correctamente colocadas en el grid.',
     };
 
     return prompts[type] || 'Eres un asistente educativo. Genera contenido en formato JSON.';

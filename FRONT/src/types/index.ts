@@ -15,6 +15,7 @@ export enum ActivityType {
   WORKSHEET = 'WORKSHEET',
   PROJECT = 'PROJECT',
   RUBRIC = 'RUBRIC',
+  GAME = 'GAME',
   OTHER = 'OTHER'
 }
 

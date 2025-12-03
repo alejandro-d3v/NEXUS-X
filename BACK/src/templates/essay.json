@@ -1,0 +1,23 @@
+{
+    "meta": {
+        "titulo": "",
+        "autor": "",
+        "institucion": "",
+        "fecha": "",
+        "nivel_educativo": "",
+        "tipo_ensayo": "",
+        "estilo": "",
+        "formato_citas": "",
+        "numero_paginas": 0
+    },
+    "resumen": "",
+    "introduccion": "",
+    "desarrollo": [
+        {
+            "titulo": "",
+            "contenido": ""
+        }
+    ],
+    "conclusion": "",
+    "referencias": []
+}

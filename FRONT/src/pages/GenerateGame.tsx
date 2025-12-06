@@ -18,6 +18,8 @@ export const GenerateGame: React.FC = () => {
     const [error, setError] = useState('');
     const [generatedGame, setGeneratedGame] = useState<any>(null);
     const [foundWords, setFoundWords] = useState<Set<string>>(new Set());
+    const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
+    const [isSelecting, setIsSelecting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -79,6 +81,90 @@ export const GenerateGame: React.FC = () => {
         });
     };
 
+    const handleCellMouseDown = (rowIndex: number, colIndex: number) => {
+        setIsSelecting(true);
+        const cellKey = `${rowIndex}-${colIndex}`;
+        const newSelected = new Set(selectedCells);
+        newSelected.add(cellKey);
+        setSelectedCells(newSelected);
+    };
+
+    const handleCellMouseEnter = (rowIndex: number, colIndex: number) => {
+        if (isSelecting) {
+            const cellKey = `${rowIndex}-${colIndex}`;
+            const newSelected = new Set(selectedCells);
+            newSelected.add(cellKey);
+            setSelectedCells(newSelected);
+        }
+    };
+
+    const handleMouseUp = (grid: string[][], words: string[]) => {
+        if (isSelecting) {
+            setIsSelecting(false);
+            // Verificar si la selección forma una palabra
+            checkSelectedWord(grid, words);
+        }
+    };
+
+    const checkSelectedWord = (grid: string[][], words: string[]) => {
+        if (selectedCells.size === 0) return;
+
+        // Convertir Set a array y ordenar por posición
+        const selectedArray = Array.from(selectedCells);
+
+        // Extraer coordenadas
+        const coords = selectedArray.map(key => {
+            const [row, col] = key.split('-').map(Number);
+            return { row, col, key };
+        });
+
+        // Ordenar para obtener la secuencia correcta
+        coords.sort((a, b) => {
+            if (a.row === b.row) return a.col - b.col; // Misma fila, ordenar por columna
+            if (a.col === b.col) return a.row - b.row; // Misma columna, ordenar por fila
+            // Diagonal
+            return (a.row + a.col) - (b.row + b.col);
+        });
+
+        // Obtener letras en orden
+        const selectedLetters = coords.map(c => grid[c.row]?.[c.col] || '').join('');
+        const selectedLettersReverse = selectedLetters.split('').reverse().join('');
+
+        console.log('Letras seleccionadas:', selectedLetters);
+
+        // Verificar contra palabras (normal y reversa)
+        const foundWord = words.find((word: string) => {
+            const wordUpper = word.toUpperCase();
+            return wordUpper === selectedLetters.toUpperCase() ||
+                wordUpper === selectedLettersReverse.toUpperCase();
+        });
+
+        if (foundWord) {
+            console.log('¡Palabra encontrada!', foundWord);
+            const newFound = new Set(foundWords);
+            newFound.add(foundWord.toUpperCase());
+            setFoundWords(newFound);
+
+            // Mostrar mensaje de éxito
+            alert(`¡Encontraste la palabra: ${foundWord}!`);
+        }
+
+        // Limpiar selección
+        setSelectedCells(new Set());
+    };
+
+    React.useEffect(() => {
+        const handleGlobalMouseUp = () => {
+            if (isSelecting && generatedGame) {
+                const content = generatedGame.content;
+                handleMouseUp(content.grid || [], content.palabras || []);
+            }
+        };
+
+        document.addEventListener('mouseup', handleGlobalMouseUp);
+        return () => document.removeEventListener('mouseup', handleGlobalMouseUp);
+    }, [isSelecting, selectedCells, generatedGame]);
+
     const renderWordSearch = (gameData: any) => {
         const grid = gameData.grid || [];
         const words = gameData.palabras || [];
@@ -88,20 +174,39 @@ export const GenerateGame: React.FC = () => {
                 <div style={styles.wordSearchGrid}>
                     {grid.map((row: string[], rowIndex: number) => (
                         <div key={rowIndex} style={styles.gridRow}>
-                            {row.map((letter: string, colIndex: number) => (
-                                <div
-                                    key={`${rowIndex}-${colIndex}`}
-                                    style={styles.gridCell}
-                                >
-                                    {letter}
-                                </div>
-                            ))}
+                            {row.map((letter: string, colIndex: number) => {
+                                const cellKey = `${rowIndex}-${colIndex}`;
+                                const isSelected = selectedCells.has(cellKey);
+                                return (
+                                    <div
+                                        key={cellKey}
+                                        style={{
+                                            ...styles.gridCell,
+                                            ...(isSelected ? styles.selectedCell : {}),
+                                            cursor: 'pointer',
+                                            userSelect: 'none',
+                                        }}
+                                        onMouseDown={() => handleCellMouseDown(rowIndex, colIndex)}
+                                        onMouseEnter={() => handleCellMouseEnter(rowIndex, colIndex)}
+                                    >
+                                        {letter}
+                                    </div>
+                                );
+                            })}
                         </div>
                     ))}
                 </div>
 
                 <div style={styles.wordList}>
                     <h3>Palabras a Buscar:</h3>
+                    <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>
+                        💡 <strong>Instrucciones:</strong>
+                    </p>
+                    <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1rem', lineHeight: '1.5' }}>
+                        1️⃣ Haz clic y mantén presionado sobre una letra<br />
+                        2️⃣ Arrastra el mouse sobre las letras de la palabra<br />
+                        3️⃣ Suelta el mouse para verificar
+                    </p>
                     <div style={styles.wordsGrid}>
                         {words.map((word: string, index: number) => (
                             <div
@@ -197,63 +302,77 @@ export const GenerateGame: React.FC = () => {
                 }
                 h1 {
                     text-align: center;
-                    margin-bottom: 20px;
+                    margin-bottom: 10px;
                 }
                 .game-info {
                     text-align: center;
                     margin-bottom: 20px;
                     color: #666;
+                    font-size: 14px;
+                }
+                .grid-container {
+                    text-align: center;
+                    margin: 20px 0;
                 }
                 .grid {
-                    display: inline-grid;
-                    gap: 0;
-                    margin: 20px auto;
+                    display: inline-block;
                     border: 2px solid #000;
                 }
                 .grid-row {
                     display: flex;
+                    margin: 0;
+                    padding: 0;
                 }
                 .cell {
-                    width: 30px;
-                    height: 30px;
+                    width: 28px;
+                    height: 28px;
                     border: 1px solid #333;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 14px;
+                    font-size: 16px;
                     font-weight: bold;
                     position: relative;
+                    box-sizing: border-box;
                 }
                 .blocked {
                     background-color: #000;
                 }
                 .cell-number {
                     position: absolute;
-                    top: 2px;
+                    top: 1px;
                     left: 2px;
                     font-size: 8px;
+                    font-weight: normal;
                 }
                 .words-section {
                     margin-top: 30px;
                     page-break-inside: avoid;
                 }
+                .words-section h3 {
+                    margin-bottom: 10px;
+                }
                 .words-grid {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
-                    gap: 10px;
+                    gap: 8px;
                     margin-top: 10px;
                 }
                 .word-item {
-                    padding: 8px;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
+                    padding: 6px;
+                    border: 1px solid #333;
+                    border-radius: 3px;
                     font-weight: bold;
+                    text-align: center;
                 }
                 .clues {
                     margin-top: 20px;
                 }
                 .clue-section {
                     margin-bottom: 20px;
+                }
+                .clue-section h3 {
+                    margin-bottom: 10px;
                 }
                 .clue {
                     margin: 5px 0;
@@ -262,7 +381,7 @@ export const GenerateGame: React.FC = () => {
             </style>
             <h1>${generatedGame.title}</h1>
             <div class="game-info">
-                Tipo: ${formData.tipoJuego} | Nivel: ${formData.nivelEducativo}
+                Tipo: ${formData.tipoJuego} | Nivel: ${formData.nivelEducativo || 'General'}
             </div>
         `;
 
@@ -271,7 +390,7 @@ export const GenerateGame: React.FC = () => {
             const grid = content.grid || [];
             const pistas = content.pistas || { horizontal: [], vertical: [] };
 
-            htmlContent += '<div style="text-align: center;"><div class="grid" style="grid-template-columns: repeat(' + grid[0]?.length + ', 30px);">';
+            htmlContent += '<div class="grid-container"><div class="grid">';
             grid.forEach((row: any[]) => {
                 htmlContent += '<div class="grid-row">';
                 row.forEach((cell: any) => {
@@ -304,7 +423,7 @@ export const GenerateGame: React.FC = () => {
             const grid = content.grid || [];
             const words = content.palabras || [];
 
-            htmlContent += '<div style="text-align: center;"><div class="grid" style="grid-template-columns: repeat(' + grid[0]?.length + ', 30px);">';
+            htmlContent += '<div class="grid-container"><div class="grid">';
             grid.forEach((row: string[]) => {
                 htmlContent += '<div class="grid-row">';
                 row.forEach((letter: string) => {
@@ -575,6 +694,13 @@ const styles = {
         fontSize: '18px',
         fontWeight: 'bold' as const,
         backgroundColor: '#fff',
+        transition: 'all 0.1s ease',
+    },
+    selectedCell: {
+        backgroundColor: '#4CAF50',
+        color: '#fff',
+        border: '2px solid #2E7D32',
+        transform: 'scale(1.05)',
     },
     crosswordCell: {
         width: '40px',
@@ -625,6 +751,7 @@ const styles = {
         color: '#fff',
         borderColor: '#4caf50',
         textDecoration: 'line-through',
+        opacity: 0.7,
     },
     cluesContainer: {
         flex: 1,

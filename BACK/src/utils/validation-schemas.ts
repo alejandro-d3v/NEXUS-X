@@ -41,9 +41,9 @@ export const generateActivitySchema = Joi.object({
   visibility: Joi.string().valid('PRIVATE', 'PUBLIC').optional(),
   additionalParams: Joi.object({
     titulo: Joi.string().optional(),
-    descripcion: Joi.string().optional(),
+    descripcion: Joi.string().optional().allow(''),
     materia: Joi.string().optional(),
-    nivelEducativo: Joi.string().optional(),
+    nivelEducativo: Joi.string().optional().allow(''),
     idioma: Joi.string().optional(),
     duracion: Joi.number().optional(),
     dificultad: Joi.string().optional(),
@@ -70,6 +70,13 @@ export const generateActivitySchema = Joi.object({
     // Game-specific fields
     tipoJuego: Joi.string().optional(),
     numeroPalabras: Joi.number().optional(),
+    // Writing correction fields
+    textoOriginal: Joi.string().optional().allow(''),
+    // Survey fields
+    tipoEncuesta: Joi.string().optional(),
+    numeroPreguntas: Joi.number().optional(),
+    incluirEscalaLikert: Joi.boolean().optional(),
+    incluirPreguntasAbiertas: Joi.boolean().optional(),
   }).optional(),
 });
 

@@ -100,8 +100,28 @@ export const Dashboard: React.FC = () => {
             <p style={styles.toolDescription}>Sopa de letras y crucigramas</p>
           </Link>
 
+          {/* Writing Correction - Special Link */}
+          <Link
+            to="/writing-correction"
+            style={styles.toolCard}
+          >
+            <div style={styles.toolIcon}>✍️</div>
+            <h3 style={styles.toolName}>Corrección de Escritura</h3>
+            <p style={styles.toolDescription}>Corrige ortografía y gramática con IA</p>
+          </Link>
+
+          {/* Survey Generator - Special Link */}
+          <Link
+            to="/generate-survey"
+            style={styles.toolCard}
+          >
+            <div style={styles.toolIcon}>📊</div>
+            <h3 style={styles.toolName}>Generador de Encuestas</h3>
+            <p style={styles.toolDescription}>Crea encuestas profesionales</p>
+          </Link>
+
           {/* Other tools */}
-          {tools.slice(6).map((tool) => (
+          {tools.slice(8).map((tool) => (
             <Link
               key={tool.type}
               to={`/generate?type=${tool.type}`}

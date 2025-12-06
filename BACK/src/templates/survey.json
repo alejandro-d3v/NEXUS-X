@@ -1,0 +1,21 @@
+{
+    "meta": {
+        "titulo": "",
+        "tipo": "",
+        "numeroPreguntas": 0,
+        "tiempoEstimado": "",
+        "objetivo": ""
+    },
+    "preguntas": [
+        {
+            "numero": 1,
+            "pregunta": "",
+            "tipo": "",
+            "opciones": [],
+            "escala": [],
+            "requerida": true
+        }
+    ],
+    "instrucciones": "",
+    "agradecimiento": ""
+}

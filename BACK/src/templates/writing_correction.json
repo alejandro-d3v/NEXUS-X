@@ -1,0 +1,24 @@
+{
+    "meta": {
+        "titulo": "",
+        "fechaCorreccion": "",
+        "numeroCorrecciones": 0
+    },
+    "textoOriginal": "",
+    "textoCorregido": "",
+    "correcciones": [
+        {
+            "tipo": "",
+            "original": "",
+            "corregido": "",
+            "explicacion": ""
+        }
+    ],
+    "resumen": {
+        "erroresOrtografia": 0,
+        "erroresGramatica": 0,
+        "erroresPuntuacion": 0,
+        "erroresEstilo": 0
+    },
+    "recomendaciones": []
+}

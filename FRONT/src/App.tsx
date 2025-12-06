@@ -12,6 +12,8 @@ import { GenerateRubric } from './pages/GenerateRubric';
 import { GenerateFlashcards } from './pages/GenerateFlashcards';
 import { GenerateEssay } from './pages/GenerateEssay';
 import { GenerateGame } from './pages/GenerateGame';
+import { WritingCorrection } from './pages/WritingCorrection';
+import { GenerateSurvey } from './pages/GenerateSurvey';
 import { MyActivities } from './pages/MyActivities';
 import { PublicActivities } from './pages/PublicActivities';
 import { ActivityDetail } from './pages/ActivityDetail';
@@ -84,6 +86,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <GenerateGame />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/writing-correction"
+            element={
+              <ProtectedRoute>
+                <WritingCorrection />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/generate-survey"
+            element={
+              <ProtectedRoute>
+                <GenerateSurvey />
               </ProtectedRoute>
             }
           />

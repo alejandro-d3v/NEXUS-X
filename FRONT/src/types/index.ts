@@ -16,6 +16,8 @@ export enum ActivityType {
   PROJECT = 'PROJECT',
   RUBRIC = 'RUBRIC',
   GAME = 'GAME',
+  WRITING_CORRECTION = 'WRITING_CORRECTION',
+  SURVEY = 'SURVEY',
   OTHER = 'OTHER'
 }
 

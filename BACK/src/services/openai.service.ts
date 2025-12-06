@@ -28,6 +28,10 @@ class OpenAIService {
         userPrompt = this.buildEssayPrompt(request);
       } else if (request.type === 'GAME' && request.additionalParams) {
         userPrompt = this.buildGamePrompt(request);
+      } else if (request.type === 'WRITING_CORRECTION' && request.additionalParams) {
+        userPrompt = this.buildWritingCorrectionPrompt(request);
+      } else if (request.type === 'SURVEY' && request.additionalParams) {
+        userPrompt = this.buildSurveyPrompt(request);
       }
 
       const completion = await this.client.chat.completions.create({
@@ -297,6 +301,105 @@ Palabras específicas: ${params.descripcion || 'Generar automáticamente'}
     }
   }
 
+  private buildWritingCorrectionPrompt(request: AIGenerationRequest): string {
+    const template = require('../templates/writing_correction.json');
+    const params = (request.additionalParams || {}) as any;
+
+    return `
+Analiza y corrige el siguiente texto en español. Identifica y corrige todos los errores de ortografía, gramática, puntuación, sintaxis y estilo.
+
+Genera la respuesta en formato JSON utilizando la siguiente estructura:
+
+${JSON.stringify(template, null, 2)}
+
+### Texto a corregir:
+${params.textoOriginal || request.prompt}
+
+### Instrucciones:
+
+1. "textoOriginal": Copia exactamente el texto original sin cambios
+2. "textoCorregido": Proporciona el texto completamente corregido
+3. "correcciones": Array con cada corrección realizada:
+   - "tipo": Tipo de error (Ortografía, Gramática, Puntuación, Sintaxis, Estilo)
+   - "original": La palabra o frase incorrecta
+   - "corregido": La palabra o frase corregida
+   - "explicacion": Breve explicación del error
+4. "resumen": Contador de errores por categoría
+5. "recomendaciones": Array con sugerencias generales para mejorar la escritura
+
+### Reglas:
+- Sigue estrictamente la estructura JSON proporcionada
+- No cambies nombres de claves
+- No añadas campos nuevos
+- Sé específico y educativo en las explicaciones
+- Responde únicamente con JSON válido
+    `.trim();
+  }
+
+  private buildSurveyPrompt(request: AIGenerationRequest): string {
+    const template = require('../templates/survey.json');
+    const params = (request.additionalParams || {}) as any;
+
+    return `
+Genera una encuesta profesional en formato JSON utilizando la siguiente estructura:
+
+${JSON.stringify(template, null, 2)}
+
+### Parámetros de la encuesta:
+
+Título: ${params.titulo || request.subject}
+Tipo de encuesta: ${params.tipoEncuesta || 'Satisfacción'}
+Número de preguntas: ${params.numeroPreguntas || 10}
+Nivel educativo: ${params.nivelEducativo || 'General'}
+Incluir escala Likert: ${params.incluirEscalaLikert ? 'Sí' : 'No'}
+Incluir preguntas abiertas: ${params.incluirPreguntasAbiertas ? 'Sí' : 'No'}
+
+${params.descripcion ? `Descripción/Contexto:
+${params.descripcion}
+` : ''}
+
+### Instrucciones:
+
+1. "meta": Información general de la encuesta
+   - "titulo": Título de la encuesta
+   - "tipo": Tipo de encuesta (${params.tipoEncuesta})
+   - "numeroPreguntas": ${params.numeroPreguntas}
+   - "tiempoEstimado": Tiempo estimado para completar (en minutos)
+   - "objetivo": Objetivo de la encuesta
+
+2. "preguntas": Array de preguntas variadas y bien diseñadas
+   Para cada pregunta:
+   - "numero": Número de la pregunta
+   - "pregunta": Texto de la pregunta
+   - "tipo": Puede ser:
+     * "Escala Likert" - Para preguntas con escala 1-5
+     * "Opción múltiple" - Para selección múltiple
+     * "Selección única" - Para una sola respuesta
+     * "Pregunta abierta" - Para respuestas texto
+   - "opciones": Array de opciones (si aplica)
+   - "escala": Array con valores de escala Likert (si aplica): ["Muy en desacuerdo", "En desacuerdo", "Neutral", "De acuerdo", "Muy de acuerdo"]
+   - "requerida": true/false
+
+3. Distribuye los tipos de preguntas de manera equilibrada:
+   - ${params.incluirEscalaLikert ? `Incluye preguntas con escala Likert (1-5)` : 'No incluir escala Likert'}
+   - ${params.incluirPreguntasAbiertas ? `Incluye preguntas abiertas para feedback detallado` : 'No incluir preguntas abiertas'}
+   - Incluye preguntas de selección múltiple o única
+
+4. "instrucciones": Instrucciones claras para completar la encuesta
+
+5. "agradecimiento": Mensaje de agradecimiento al final
+
+### Reglas:
+- Sigue estrictamente la estructura JSON proporcionada
+- Las preguntas deben ser claras, específicas y relevantes al tema
+- No cambies nombres de claves
+- No añadas campos nuevos
+- Asegúrate de que el número de preguntas sea exactamente ${params.numeroPreguntas}
+- Las preguntas deben ser apropiadas para el nivel ${params.nivelEducativo || 'general'}
+- Responde únicamente con JSON válido
+    `.trim();
+  }
+
 
   private getSystemPrompt(type: string): string {
     const prompts: Record<string, string> = {
@@ -308,7 +411,6 @@ Palabras específicas: ${params.descripcion || 'Generar automáticamente'}
       SURVEY: 'Eres un asistente educativo experto en crear encuestas. Genera preguntas de encuesta en formato JSON.',
       RUBRIC: 'Eres un asistente educativo experto en crear rúbricas de evaluación. Genera criterios y niveles en formato JSON.',
       LESSON_PLAN: 'Eres un asistente educativo experto en crear planes de clase. Genera un plan detallado en formato JSON.',
-      GAME: 'Eres un asistente educativo experto en crear juegos educativos. Genera contenido de juego en formato JSON.',
       CHATBOT: 'Eres un asistente educativo experto en la materia solicitada. Responde de manera clara y pedagógica en formato JSON.',
       WRITING_CORRECTION: 'Eres un asistente educativo experto en corrección de escritura. Analiza y corrige el texto en formato JSON.',
       FLASHCARDS: 'Eres un asistente educativo experto en crear tarjetas de estudio (flashcards). Genera tarjetas educativas en formato JSON. Sigue estrictamente la estructura JSON proporcionada. Responde únicamente con JSON válido y nada más. No cambies nombres de claves. No añadas campos nuevos.',

@@ -18,4 +18,7 @@ router.patch('/users/:userId/activate', adminUserController.activateUser);
 router.patch('/users/:userId', adminUserController.updateUser);
 router.delete('/users/:userId', adminUserController.deleteUser);
 
+// DANGEROUS: Database reset - deletes ALL data except the requesting ADMIN
+router.delete('/database-reset', adminUserController.resetDatabase);
+
 export default router;

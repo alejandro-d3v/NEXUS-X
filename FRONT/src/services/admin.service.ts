@@ -96,4 +96,26 @@ export const adminService = {
     async deleteUser(userId: string): Promise<void> {
         await api.delete(`/admin/users/${userId}`);
     },
+
+    async resetDatabase(confirmationPhrase: string): Promise<{
+        success: boolean;
+        message: string;
+        deletedCounts: {
+            activityGrades: number;
+            activities: number;
+            creditHistory: number;
+            invitationCodes: number;
+            studentGrades: number;
+            studentProfiles: number;
+            grades: number;
+            teacherProfiles: number;
+            institutions: number;
+            users: number;
+        };
+    }> {
+        const response = await api.delete('/admin/database-reset', {
+            data: { confirmationPhrase },
+        });
+        return response.data;
+    },
 };

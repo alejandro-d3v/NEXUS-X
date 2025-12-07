@@ -585,6 +585,84 @@ class AdminUserService {
             where: { id: userId },
         });
     }
+
+    async resetDatabase(adminUserId: string, confirmationPhrase: string) {
+        // Verify user is ADMIN
+        const adminUser = await prisma.user.findUnique({
+            where: { id: adminUserId },
+        });
+
+        if (!adminUser || adminUser.role !== UserRole.ADMIN) {
+            throw new BadRequestError('Only ADMIN users can reset the database');
+        }
+
+        // Verify confirmation phrase
+        if (confirmationPhrase !== 'DELETE ALL DATA') {
+            throw new BadRequestError('Invalid confirmation phrase');
+        }
+
+        // Delete all data in transaction, preserving only the requesting admin
+        const deletedCounts = await prisma.$transaction(async (tx) => {
+            // Delete in order respecting foreign key constraints
+            
+            // 1. Delete ActivityGrade (junction table)
+            const activityGrades = await tx.activityGrade.deleteMany({});
+
+            // 2. Delete Activities
+            const activities = await tx.activity.deleteMany({
+                where: { userId: { not: adminUserId } },
+            });
+
+            // 3. Delete CreditHistory
+            const creditHistory = await tx.creditHistory.deleteMany({
+                where: { userId: { not: adminUserId } },
+            });
+
+            // 4. Delete InvitationCodes
+            const invitationCodes = await tx.invitationCode.deleteMany({});
+
+            // 5. Delete StudentGrade (junction table)
+            const studentGrades = await tx.studentGrade.deleteMany({});
+
+            // 6. Delete StudentProfiles
+            const studentProfiles = await tx.studentProfile.deleteMany({
+                where: { userId: { not: adminUserId } },
+            });
+
+            // 7. Delete Grades
+            const grades = await tx.grade.deleteMany({});
+
+            // 8. Delete TeacherProfiles
+            const teacherProfiles = await tx.teacherProfile.deleteMany({
+                where: { userId: { not: adminUserId } },
+            });
+
+            // 9. Delete Institutions
+            const institutions = await tx.institution.deleteMany({});
+
+            // 10. Delete all Users except the requesting ADMIN
+            const users = await tx.user.deleteMany({
+                where: {
+                    id: { not: adminUserId },
+                },
+            });
+
+            return {
+                activityGrades: activityGrades.count,
+                activities: activities.count,
+                creditHistory: creditHistory.count,
+                invitationCodes: invitationCodes.count,
+                studentGrades: studentGrades.count,
+                studentProfiles: studentProfiles.count,
+                grades: grades.count,
+                teacherProfiles: teacherProfiles.count,
+                institutions: institutions.count,
+                users: users.count,
+            };
+        });
+
+        return deletedCounts;
+    }
 }
 
 export default new AdminUserService();

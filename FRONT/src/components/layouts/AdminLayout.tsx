@@ -8,7 +8,8 @@ import {
     FaGraduationCap,
     FaSignOutAlt,
     FaBars,
-    FaTimes
+    FaTimes,
+    FaExclamationTriangle
 } from 'react-icons/fa';
 
 export const AdminLayout: React.FC = () => {
@@ -21,6 +22,7 @@ export const AdminLayout: React.FC = () => {
         { path: '/admin/institutions', icon: FaBuilding, label: 'Institutions' },
         { path: '/admin/users', icon: FaUsers, label: 'Users' },
         { path: '/admin/grades', icon: FaGraduationCap, label: 'Grades' },
+        { path: '/admin/database-reset', icon: FaExclamationTriangle, label: 'Database Reset', danger: true },
     ];
 
     const isActive = (path: string) => location.pathname === path;
@@ -44,7 +46,7 @@ export const AdminLayout: React.FC = () => {
                         <Link
                             key={item.path}
                             to={item.path}
-                            className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
+                            className={`nav-item ${isActive(item.path) ? 'active' : ''} ${(item as any).danger ? 'danger' : ''}`}
                         >
                             <item.icon className="nav-icon" />
                             {sidebarOpen && <span className="nav-label">{item.label}</span>}

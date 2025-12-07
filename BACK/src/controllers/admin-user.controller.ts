@@ -172,3 +172,30 @@ export const deleteUser = async (req: AuthRequest, res: Response, next: NextFunc
         next(error);
     }
 };
+
+export const resetDatabase = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.userId;
+        const { confirmationPhrase } = req.body;
+
+        if (!userId) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+        }
+
+        if (!confirmationPhrase) {
+            res.status(400).json({ error: 'Confirmation phrase is required' });
+            return;
+        }
+
+        const deletedCounts = await adminUserService.resetDatabase(userId, confirmationPhrase);
+
+        res.json({
+            success: true,
+            message: 'Database reset successfully. All data has been deleted except your admin account.',
+            deletedCounts,
+        });
+    } catch (error) {
+        next(error);
+    }
+};

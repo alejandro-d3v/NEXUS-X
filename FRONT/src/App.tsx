@@ -17,6 +17,7 @@ import { AdminDashboard } from './pages/admin/Dashboard';
 import { InstitutionManagement } from './pages/admin/InstitutionManagement';
 import { UserManagement } from './pages/admin/UserManagement';
 import { GradeManagement } from './pages/admin/GradeManagement';
+import { DatabaseReset } from './pages/admin/DatabaseReset';
 
 // Teacher pages
 import { TeacherDashboard } from './pages/teacher/Dashboard';
@@ -96,6 +97,7 @@ function App() {
             <Route path="institutions" element={<InstitutionManagement />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="grades" element={<GradeManagement />} />
+            <Route path="database-reset" element={<DatabaseReset />} />
           </Route>
 
           {/* Teacher Routes with Layout */}

@@ -5,8 +5,6 @@ class GradeService {
     async createGrade(data: {
         name: string;
         description?: string;
-        subject?: string;
-        level?: string;
         institutionId: string;
         teacherId: string;
     }) {
@@ -158,8 +156,6 @@ class GradeService {
     async updateGrade(id: string, data: {
         name?: string;
         description?: string;
-        subject?: string;
-        level?: string;
         isActive?: boolean;
     }) {
         const grade = await prisma.grade.update({

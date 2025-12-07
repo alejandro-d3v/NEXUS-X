@@ -3,6 +3,7 @@ import prisma from '../config/database';
 import { config } from '../config';
 import { UserRole } from '../types';
 import { NotFoundError, BadRequestError } from '../utils/errors';
+import { randomUUID } from 'crypto';
 
 class AdminUserService {
     async createUser(data: {
@@ -115,7 +116,6 @@ class AdminUserService {
         institutionId: string,
         gradeId: string,
         profileData?: {
-            studentId?: string;
             notes?: string;
         }
     ) {
@@ -160,12 +160,13 @@ class AdminUserService {
                 },
             });
 
+            // Auto-generate studentId using UUID
             const studentProfile = await tx.studentProfile.create({
                 data: {
                     userId: user.id,
                     institutionId,
                     gradeId,
-                    studentId: profileData?.studentId,
+                    studentId: randomUUID(),
                     notes: profileData?.notes,
                 },
             });
@@ -241,7 +242,6 @@ class AdminUserService {
         gradeId: string,
         institutionId: string,
         profileData?: {
-            studentId?: string;
             notes?: string;
         }
     ) {
@@ -285,18 +285,17 @@ class AdminUserService {
                 data: {
                     gradeId,
                     institutionId,
-                    studentId: profileData?.studentId,
                     notes: profileData?.notes,
                 },
             });
         } else {
-            // Create new profile
+            // Create new profile with auto-generated studentId
             studentProfile = await prisma.studentProfile.create({
                 data: {
                     userId,
                     gradeId,
                     institutionId,
-                    studentId: profileData?.studentId,
+                    studentId: randomUUID(),
                     notes: profileData?.notes,
                 },
             });
@@ -556,6 +555,35 @@ class AdminUserService {
         });
 
         return this.getUserWithProfile(userId);
+    }
+
+    async deleteUser(userId: string) {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+                teacherProfile: {
+                    include: {
+                        gradesInCharge: true,
+                    },
+                },
+            },
+        });
+
+        if (!user) {
+            throw new NotFoundError('User not found');
+        }
+
+        // Check if teacher has grades assigned
+        if (user.teacherProfile && user.teacherProfile.gradesInCharge.length > 0) {
+            throw new BadRequestError(
+                'Cannot delete user: teacher is in charge of grades. Please reassign grades first.'
+            );
+        }
+
+        // Hard delete - Prisma will cascade delete related profiles
+        await prisma.user.delete({
+            where: { id: userId },
+        });
     }
 }
 

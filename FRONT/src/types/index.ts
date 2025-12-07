@@ -66,8 +66,6 @@ export interface Grade {
   id: string;
   name: string;
   description?: string;
-  subject?: string;
-  level?: string;
   isActive: boolean;
   institutionId: string;
   teacherId: string;
@@ -141,7 +139,6 @@ export interface InvitationCode {
   grade?: {
     id: string;
     name: string;
-    subject?: string;
   };
   institution?: {
     id: string;
@@ -211,8 +208,6 @@ export interface CreateInstitutionRequest {
 export interface CreateGradeRequest {
   name: string;
   description?: string;
-  subject?: string;
-  level?: string;
   institutionId: string;
   teacherId: string;
 }
@@ -235,7 +230,6 @@ export interface CreateStudentRequest {
   lastName: string;
   institutionId: string;
   gradeId: string;
-  studentId?: string;
   notes?: string;
 }
 

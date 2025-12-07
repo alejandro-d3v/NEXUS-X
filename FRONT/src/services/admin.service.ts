@@ -92,4 +92,8 @@ export const adminService = {
         const response = await api.patch(`/admin/users/${userId}`, data);
         return response.data;
     },
+
+    async deleteUser(userId: string): Promise<void> {
+        await api.delete(`/admin/users/${userId}`);
+    },
 };

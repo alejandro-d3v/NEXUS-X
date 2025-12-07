@@ -70,7 +70,6 @@ class InvitationService {
                     select: {
                         id: true,
                         name: true,
-                        subject: true,
                     },
                 },
                 institution: {
@@ -210,7 +209,6 @@ class InvitationService {
                     select: {
                         id: true,
                         name: true,
-                        subject: true,
                     },
                 },
             },
@@ -228,7 +226,6 @@ class InvitationService {
                     select: {
                         id: true,
                         name: true,
-                        subject: true,
                     },
                 },
             },

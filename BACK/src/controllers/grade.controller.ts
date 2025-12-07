@@ -6,7 +6,7 @@ import { UserRole } from '../types';
 
 export const createGrade = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { name, description, subject, level, institutionId, teacherId } = req.body;
+        const { name, description, institutionId, teacherId } = req.body;
         const userId = req.user?.userId;
         const userRole = req.user?.role;
 
@@ -53,8 +53,6 @@ export const createGrade = async (req: AuthRequest, res: Response): Promise<void
         const grade = await gradeService.createGrade({
             name,
             description,
-            subject,
-            level,
             institutionId,
             teacherId: finalTeacherId,
         });
@@ -99,13 +97,11 @@ export const getGradeById = async (req: AuthRequest, res: Response) => {
 export const updateGrade = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params;
-        const { name, description, subject, level, isActive } = req.body;
+        const { name, description, isActive } = req.body;
 
         const grade = await gradeService.updateGrade(id, {
             name,
             description,
-            subject,
-            level,
             isActive,
         });
 

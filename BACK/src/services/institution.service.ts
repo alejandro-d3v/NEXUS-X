@@ -105,10 +105,9 @@ class InstitutionService {
     }
 
     async deleteInstitution(id: string) {
-        // Soft delete
-        const institution = await prisma.institution.update({
+        // Hard delete
+        const institution = await prisma.institution.delete({
             where: { id },
-            data: { isActive: false },
         });
 
         return institution;

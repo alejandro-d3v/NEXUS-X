@@ -29,7 +29,6 @@ export const createStudent = async (req: AuthRequest, res: Response) => {
             lastName,
             institutionId,
             gradeId,
-            studentId,
             notes,
         } = req.body;
 
@@ -37,7 +36,7 @@ export const createStudent = async (req: AuthRequest, res: Response) => {
             { email, password, firstName, lastName },
             institutionId,
             gradeId,
-            { studentId, notes }
+            { notes }
         );
 
         res.status(201).json(result);
@@ -68,13 +67,13 @@ export const assignTeacherToInstitution = async (req: AuthRequest, res: Response
 export const assignStudentToGrade = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params;
-        const { gradeId, institutionId, studentId, notes } = req.body;
+        const { gradeId, institutionId, notes } = req.body;
 
         const studentProfile = await adminUserService.assignStudentToGrade(
             id,
             gradeId,
             institutionId,
-            { studentId, notes }
+            { notes }
         );
 
         res.json(studentProfile);
@@ -159,6 +158,16 @@ export const updateUser = async (req: AuthRequest, res: Response, next: NextFunc
             credits,
         });
         res.json(user);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const deleteUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const { userId } = req.params;
+        await adminUserService.deleteUser(userId);
+        res.status(204).send();
     } catch (error) {
         next(error);
     }

@@ -143,8 +143,6 @@ model Grade {
   id          String   @id @default(uuid())
   name        String // e.g., "5th Grade A", "Math 101"
   description String?
-  subject     String? // e.g., "Mathematics", "Science"
-  level       String? // e.g., "Elementary", "High School"
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

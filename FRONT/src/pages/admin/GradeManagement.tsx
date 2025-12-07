@@ -20,8 +20,6 @@ export const GradeManagement: React.FC = () => {
     const [formData, setFormData] = useState<CreateGradeRequest>({
         name: '',
         description: '',
-        subject: '',
-        level: '',
         institutionId: '',
         teacherId: '',
     });
@@ -72,8 +70,6 @@ export const GradeManagement: React.FC = () => {
         setFormData({
             name: grade.name,
             description: grade.description || '',
-            subject: grade.subject || '',
-            level: grade.level || '',
             institutionId: grade.institutionId,
             teacherId: grade.teacherId,
         });
@@ -128,8 +124,6 @@ export const GradeManagement: React.FC = () => {
         setFormData({
             name: '',
             description: '',
-            subject: '',
-            level: '',
             institutionId: '',
             teacherId: '',
         });
@@ -138,8 +132,6 @@ export const GradeManagement: React.FC = () => {
 
     const columns = [
         { key: 'name', label: 'Grade Name' },
-        { key: 'subject', label: 'Subject' },
-        { key: 'level', label: 'Level' },
         {
             key: 'institution',
             label: 'Institution',
@@ -268,26 +260,6 @@ export const GradeManagement: React.FC = () => {
                                     rows={3}
                                     placeholder="Optional description"
                                 />
-                            </div>
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Subject</label>
-                                    <input
-                                        type="text"
-                                        value={formData.subject}
-                                        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                                        placeholder="e.g., Mathematics, Science"
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Level</label>
-                                    <input
-                                        type="text"
-                                        value={formData.level}
-                                        onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                                        placeholder="e.g., Beginner, Advanced"
-                                    />
-                                </div>
                             </div>
                             <div className="form-group">
                                 <label>Institution *</label>

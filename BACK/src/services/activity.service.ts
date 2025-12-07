@@ -30,7 +30,6 @@ class ActivityService {
               select: {
                 id: true,
                 name: true,
-                subject: true,
               },
             },
           },
@@ -57,8 +56,6 @@ class ActivityService {
               select: {
                 id: true,
                 name: true,
-                subject: true,
-                level: true,
               },
             },
           },
@@ -289,8 +286,6 @@ class ActivityService {
               select: {
                 id: true,
                 name: true,
-                subject: true,
-                level: true,
               },
             },
           },
@@ -327,8 +322,6 @@ class ActivityService {
           select: {
             id: true,
             name: true,
-            subject: true,
-            level: true,
           },
         },
       },

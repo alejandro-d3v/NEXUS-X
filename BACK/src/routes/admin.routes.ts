@@ -12,9 +12,10 @@ router.use(authenticate, authorize(UserRole.ADMIN));
 router.post('/users/teacher', adminUserController.createTeacher);
 router.post('/users/student', adminUserController.createStudent);
 router.get('/users', adminUserController.getAllUsersWithProfiles);
-router.patch('/users/:userId/role', adminUserController.updateUserRole);
+router.put('/users/:userId/role', adminUserController.updateUserRole);
 router.patch('/users/:userId/deactivate', adminUserController.deactivateUser);
 router.patch('/users/:userId/activate', adminUserController.activateUser);
 router.patch('/users/:userId', adminUserController.updateUser);
+router.delete('/users/:userId', adminUserController.deleteUser);
 
 export default router;

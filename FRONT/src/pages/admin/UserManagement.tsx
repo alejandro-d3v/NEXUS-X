@@ -32,7 +32,6 @@ export const UserManagement: React.FC = () => {
         lastName: '',
         institutionId: '',
         gradeId: '',
-        studentId: '',
     });
     const [editForm, setEditForm] = useState({
         userId: '',
@@ -165,6 +164,18 @@ export const UserManagement: React.FC = () => {
         }
     };
 
+    const handleDeleteUser = async (user: User) => {
+        if (!window.confirm(`Are you sure you want to permanently delete ${user.firstName} ${user.lastName}? This action cannot be undone.`)) return;
+
+        try {
+            await adminService.deleteUser(user.id);
+            toast.success('User deleted successfully');
+            fetchData();
+        } catch (error: any) {
+            toast.error(error.response?.data?.error || 'Error deleting user');
+        }
+    };
+
     const resetForms = () => {
         setTeacherForm({
             email: '',
@@ -182,7 +193,6 @@ export const UserManagement: React.FC = () => {
             lastName: '',
             institutionId: '',
             gradeId: '',
-            studentId: '',
         });
     };
 
@@ -270,6 +280,13 @@ export const UserManagement: React.FC = () => {
                         className={`btn-sm ${item.isActive ? 'btn-danger' : 'btn-success'}`}
                     >
                         {item.isActive ? 'Deactivate' : 'Activate'}
+                    </button>
+                    <button
+                        onClick={() => handleDeleteUser(item)}
+                        className="btn-sm btn-danger"
+                        title="Delete User Permanently"
+                    >
+                        Delete
                     </button>
                 </div>
             ),
@@ -490,15 +507,6 @@ export const UserManagement: React.FC = () => {
                                             <option key={grade.id} value={grade.id}>{grade.name}</option>
                                         ))}
                                     </select>
-                                </div>
-                                <div className="form-group">
-                                    <label>Student ID</label>
-                                    <input
-                                        type="text"
-                                        value={studentForm.studentId}
-                                        onChange={(e) => setStudentForm({ ...studentForm, studentId: e.target.value })}
-                                        placeholder="Optional student ID"
-                                    />
                                 </div>
                                 <div className="modal-actions">
                                     <button type="button" onClick={() => setShowModal(false)} className="btn btn-secondary">

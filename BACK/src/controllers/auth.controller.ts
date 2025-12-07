@@ -48,16 +48,20 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
       include: {
         studentProfile: {
           include: {
-            grade: {
+            grades: {
               include: {
-                institution: true,
-                teacher: {
+                grade: {
                   include: {
-                    user: {
-                      select: {
-                        firstName: true,
-                        lastName: true,
-                        email: true,
+                    institution: true,
+                    teacher: {
+                      include: {
+                        user: {
+                          select: {
+                            firstName: true,
+                            lastName: true,
+                            email: true,
+                          },
+                        },
                       },
                     },
                   },

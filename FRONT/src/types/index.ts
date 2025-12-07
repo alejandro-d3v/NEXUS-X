@@ -101,7 +101,12 @@ export interface StudentProfile {
   createdAt: string;
   updatedAt: string;
   institution?: Institution;
-  grade?: Grade;
+  grade?: Grade; // Legacy single grade
+  grades?: Array<{  // New many-to-many grades
+    enrolledAt: string;
+    isActive: boolean;
+    grade: Grade;
+  }>;
   user?: User;
 }
 

@@ -258,28 +258,44 @@ class GradeService {
     }
 
     async getGradeStudents(gradeId: string) {
-        const students = await prisma.studentProfile.findMany({
-            where: { gradeId },
+        // Query through StudentGrade many-to-many table
+        const studentGrades = await prisma.studentGrade.findMany({
+            where: {
+                gradeId,
+                isActive: true,
+            },
             include: {
-                user: {
-                    select: {
-                        id: true,
-                        email: true,
-                        firstName: true,
-                        lastName: true,
-                        isActive: true,
-                        createdAt: true,
+                student: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                email: true,
+                                firstName: true,
+                                lastName: true,
+                                isActive: true,
+                                createdAt: true,
+                            },
+                        },
+                        institution: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
                     },
                 },
             },
             orderBy: {
-                user: {
-                    firstName: 'asc',
-                },
+                enrolledAt: 'desc',
             },
         });
 
-        return students;
+        // Transform to match expected format (array of student profiles with user data)
+        return studentGrades.map((sg: any) => ({
+            ...sg.student,
+            enrolledAt: sg.enrolledAt,
+        }));
     }
 }
 

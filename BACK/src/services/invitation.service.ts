@@ -304,11 +304,24 @@ class InvitationService {
                 throw new BadRequestError('Only students can join courses');
             }
 
+            // Ensure student profile exists - create if it doesn't
+            let studentProfile = user.studentProfile;
+            
+            if (!studentProfile) {
+                studentProfile = await prisma.studentProfile.create({
+                    data: {
+                        userId: user.id,
+                        institutionId: institution!.id,
+                        studentId: `STU-${Date.now()}`,
+                    },
+                });
+            }
+
             // Check if already enrolled in this grade via StudentGrade
             const existingEnrollment = await prisma.studentGrade.findUnique({
                 where: {
                     studentId_gradeId: {
-                        studentId: user.studentProfile!.id,
+                        studentId: studentProfile.id,
                         gradeId: grade!.id,
                     },
                 },
@@ -321,35 +334,11 @@ class InvitationService {
             // Create StudentGrade enrollment (allows multiple courses)
             await prisma.studentGrade.create({
                 data: {
-                    studentId: user.studentProfile!.id,
+                    studentId: studentProfile.id,
                     gradeId: grade!.id,
                     isActive: true,
                 },
             });
-
-            // If no student profile exists, create one
-            if (!user.studentProfile) {
-                await prisma.studentProfile.create({
-                    data: {
-                        userId: user.id,
-                        institutionId: institution!.id,
-                        studentId: `STU-${Date.now()}`,
-                    },
-                });
-
-                // Create the StudentGrade enrollment
-                const newStudentProfile = await prisma.studentProfile.findUnique({
-                    where: { userId: user.id },
-                });
-
-                await prisma.studentGrade.create({
-                    data: {
-                        studentId: newStudentProfile!.id,
-                        gradeId: grade!.id,
-                        isActive: true,
-                    },
-                });
-            }
 
             // Increment code usage
             await prisma.invitationCode.update({

@@ -151,24 +151,24 @@ export const StudentDashboard: React.FC = () => {
                         <h3>My Courses</h3>
                     </div>
                     <div className="info-card-body">
-                        {courseActivities.length > 0 ? (
+                        {studentProfile?.grades && studentProfile.grades.length > 0 ? (
                             <>
                                 <div className="info-row">
                                     <span className="info-label">Enrolled Courses:</span>
-                                    <span className="info-value">{courseActivities.length}</span>
+                                    <span className="info-value">{studentProfile.grades.length}</span>
                                 </div>
                                 <div className="info-row">
                                     <span className="info-label">Total Activities:</span>
                                     <span className="info-value">{totalActivities}</span>
                                 </div>
                                 <div style={{ marginTop: '1rem' }}>
-                                    {courseActivities.map((course) => (
-                                        <div key={course.grade.id} className="course-badge">
+                                    {studentProfile.grades.map((enrollment: any) => (
+                                        <div key={enrollment.grade.id} className="course-badge">
                                             <span className="badge badge-blue" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>
-                                                {course.grade.name}
+                                                {enrollment.grade.name}
                                             </span>
                                             <span style={{ marginLeft: '0.5rem', color: '#666', fontSize: '0.9rem' }}>
-                                                ({course.activities.length} {course.activities.length === 1 ? 'activity' : 'activities'})
+                                                {enrollment.grade.subject || 'No subject'}
                                             </span>
                                         </div>
                                     ))}
@@ -176,7 +176,7 @@ export const StudentDashboard: React.FC = () => {
                             </>
                         ) : (
                             <p style={{ color: '#999', textAlign: 'center', padding: '1rem' }}>
-                                No courses assigned yet. Please contact your administrator.
+                                No courses enrolled yet. Use an invitation code to join a course.
                             </p>
                         )}
                     </div>

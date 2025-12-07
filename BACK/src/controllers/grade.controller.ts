@@ -2,26 +2,52 @@ import { Response } from 'express';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import gradeService from '../services/grade.service';
 import prisma from '../config/database';
+import { UserRole } from '../types';
 
 export const createGrade = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const { name, description, subject, level, institutionId } = req.body;
+        const { name, description, subject, level, institutionId, teacherId } = req.body;
         const userId = req.user?.userId;
+        const userRole = req.user?.role;
 
         if (!userId) {
             res.status(401).json({ error: 'Unauthorized' });
             return;
         }
 
-        // Get teacher profile ID from user
-        const teacherProfile = await prisma.teacherProfile.findUnique({
-            where: { userId },
-            select: { id: true },
-        });
+        let finalTeacherId: string;
 
-        if (!teacherProfile) {
-            res.status(404).json({ error: 'Teacher profile not found' });
-            return;
+        // If user is ADMIN, they can specify any teacherId
+        if (userRole === UserRole.ADMIN) {
+            if (!teacherId) {
+                res.status(400).json({ error: 'teacherId is required for ADMIN users' });
+                return;
+            }
+            
+            // Verify the specified teacher profile exists
+            const specifiedTeacherProfile = await prisma.teacherProfile.findUnique({
+                where: { id: teacherId },
+            });
+
+            if (!specifiedTeacherProfile) {
+                res.status(404).json({ error: 'Specified teacher profile not found' });
+                return;
+            }
+
+            finalTeacherId = teacherId;
+        } else {
+            // If user is TEACHER, use their own teacher profile
+            const teacherProfile = await prisma.teacherProfile.findUnique({
+                where: { userId },
+                select: { id: true },
+            });
+
+            if (!teacherProfile) {
+                res.status(404).json({ error: 'Teacher profile not found' });
+                return;
+            }
+
+            finalTeacherId = teacherProfile.id;
         }
 
         const grade = await gradeService.createGrade({
@@ -30,7 +56,7 @@ export const createGrade = async (req: AuthRequest, res: Response): Promise<void
             subject,
             level,
             institutionId,
-            teacherId: teacherProfile.id,
+            teacherId: finalTeacherId,
         });
 
         res.status(201).json(grade);

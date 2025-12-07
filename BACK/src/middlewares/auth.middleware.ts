@@ -17,6 +17,13 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
     const token = authHeader.substring(7);
     const payload = authService.verifyToken(token);
 
+    console.log('🔓 Token Decoded:', {
+      userId: payload.userId,
+      email: payload.email,
+      role: payload.role,
+      roleType: typeof payload.role
+    });
+
     req.user = payload;
     return next();
   } catch (error) {
@@ -30,10 +37,20 @@ export const authorize = (...roles: UserRole[]) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
+    console.log('🔐 Authorization Check:', {
+      userRole: req.user.role,
+      requiredRoles: roles,
+      roleType: typeof req.user.role,
+      userId: req.user.userId,
+      email: req.user.email
+    });
+
     if (!roles.includes(req.user.role)) {
+      console.log('❌ Authorization FAILED - Role not in allowed list');
       return res.status(403).json({ error: 'Forbidden' });
     }
 
+    console.log('✅ Authorization SUCCESS');
     return next();
   };
 };

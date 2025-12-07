@@ -5,9 +5,8 @@ import { FaUser, FaEnvelope, FaIdCard, FaCoins, FaGraduationCap, FaBuilding, FaC
 export const StudentProfile: React.FC = () => {
     const { user } = useAuth();
     const studentProfile = user?.studentProfile;
-    const grade = studentProfile?.grade;
+    const enrolledCourses = studentProfile?.grades || [];
     const institution = studentProfile?.institution;
-    const teacher = grade?.teacher;
 
     return (
         <div className="page-container">
@@ -88,87 +87,103 @@ export const StudentProfile: React.FC = () => {
                 </div>
             </div>
 
-            {/* Enrollment Information */}
+            {/* Enrollment Information - Show ALL enrolled courses */}
             <div className="section-card" style={{ marginTop: '2rem' }}>
                 <div className="section-header">
                     <FaGraduationCap className="section-icon" style={{ color: '#3b82f6' }} />
-                    <h2>Enrollment Information</h2>
+                    <h2>Enrolled Courses ({enrolledCourses.length})</h2>
                 </div>
 
-                {grade ? (
-                    <div className="profile-grid">
-                        <div className="profile-item">
-                            <div className="profile-item-icon">
-                                <FaGraduationCap />
-                            </div>
-                            <div className="profile-item-content">
-                                <label>Grade</label>
-                                <p>{grade.name}</p>
-                            </div>
-                        </div>
+                {enrolledCourses.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        {enrolledCourses.map((enrollment, index) => {
+                            const grade = enrollment.grade;
+                            const teacher = grade?.teacher;
+                            
+                            return (
+                                <div key={index} style={{ 
+                                    padding: '1.5rem', 
+                                    background: '#f9fafb', 
+                                    borderRadius: '8px',
+                                    border: '1px solid #e5e7eb'
+                                }}>
+                                    <div className="profile-grid">
+                                        <div className="profile-item">
+                                            <div className="profile-item-icon">
+                                                <FaGraduationCap />
+                                            </div>
+                                            <div className="profile-item-content">
+                                                <label>Course</label>
+                                                <p>{grade?.name}</p>
+                                            </div>
+                                        </div>
 
-                        <div className="profile-item">
-                            <div className="profile-item-icon">
-                                <FaBuilding />
-                            </div>
-                            <div className="profile-item-content">
-                                <label>Institution</label>
-                                <p>{institution?.name || 'N/A'}</p>
-                            </div>
-                        </div>
+                                        <div className="profile-item">
+                                            <div className="profile-item-icon">
+                                                <FaBuilding />
+                                            </div>
+                                            <div className="profile-item-content">
+                                                <label>Institution</label>
+                                                <p>{grade?.institution?.name || institution?.name || 'N/A'}</p>
+                                            </div>
+                                        </div>
 
-                        <div className="profile-item">
-                            <div className="profile-item-icon">
-                                <FaGraduationCap />
-                            </div>
-                            <div className="profile-item-content">
-                                <label>Subject</label>
-                                <p>{grade.subject || 'N/A'}</p>
-                            </div>
-                        </div>
+                                        <div className="profile-item">
+                                            <div className="profile-item-icon">
+                                                <FaGraduationCap />
+                                            </div>
+                                            <div className="profile-item-content">
+                                                <label>Subject</label>
+                                                <p>{grade?.subject || 'N/A'}</p>
+                                            </div>
+                                        </div>
 
-                        <div className="profile-item">
-                            <div className="profile-item-icon">
-                                <FaGraduationCap />
-                            </div>
-                            <div className="profile-item-content">
-                                <label>Level</label>
-                                <p>{grade.level || 'N/A'}</p>
-                            </div>
-                        </div>
+                                        <div className="profile-item">
+                                            <div className="profile-item-icon">
+                                                <FaGraduationCap />
+                                            </div>
+                                            <div className="profile-item-content">
+                                                <label>Level</label>
+                                                <p>{grade?.level || 'N/A'}</p>
+                                            </div>
+                                        </div>
 
-                        {teacher && (
-                            <div className="profile-item">
-                                <div className="profile-item-icon">
-                                    <FaChalkboardTeacher />
+                                        {teacher && (
+                                            <div className="profile-item">
+                                                <div className="profile-item-icon">
+                                                    <FaChalkboardTeacher />
+                                                </div>
+                                                <div className="profile-item-content">
+                                                    <label>Teacher</label>
+                                                    <p>{teacher.user?.firstName} {teacher.user?.lastName}</p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="profile-item">
+                                            <div className="profile-item-icon">
+                                                <FaCalendar />
+                                            </div>
+                                            <div className="profile-item-content">
+                                                <label>Enrolled On</label>
+                                                <p>
+                                                    {enrollment.enrolledAt
+                                                        ? new Date(enrollment.enrolledAt).toLocaleDateString()
+                                                        : 'N/A'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="profile-item-content">
-                                    <label>Teacher</label>
-                                    <p>{teacher.user?.firstName} {teacher.user?.lastName}</p>
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="profile-item">
-                            <div className="profile-item-icon">
-                                <FaCalendar />
-                            </div>
-                            <div className="profile-item-content">
-                                <label>Enrollment Date</label>
-                                <p>
-                                    {studentProfile?.enrollmentDate
-                                        ? new Date(studentProfile.enrollmentDate).toLocaleDateString()
-                                        : 'N/A'}
-                                </p>
-                            </div>
-                        </div>
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="empty-state">
                         <FaGraduationCap size={48} color="#ccc" />
-                        <p>Not enrolled in any grade yet</p>
+                        <p>Not enrolled in any courses yet</p>
                         <p style={{ fontSize: '0.9rem', color: '#999' }}>
-                            Contact your teacher or administrator for enrollment
+                            Use an invitation code to join a course
                         </p>
                     </div>
                 )}

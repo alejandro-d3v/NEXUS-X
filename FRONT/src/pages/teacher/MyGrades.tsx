@@ -17,8 +17,6 @@ export const MyGrades: React.FC = () => {
     const [gradeForm, setGradeForm] = useState({
         name: '',
         description: '',
-        subject: '',
-        level: '',
         institutionId: '',
     });
 
@@ -66,8 +64,6 @@ export const MyGrades: React.FC = () => {
         setGradeForm({
             name: grade.name,
             description: grade.description || '',
-            subject: grade.subject || '',
-            level: grade.level || '',
             institutionId: grade.institutionId,
         });
         setShowModal(true);
@@ -94,8 +90,6 @@ export const MyGrades: React.FC = () => {
         setGradeForm({
             name: '',
             description: '',
-            subject: '',
-            level: '',
             institutionId: '',
         });
         setEditingGrade(null);
@@ -103,8 +97,6 @@ export const MyGrades: React.FC = () => {
 
     const columns = [
         { key: 'name', label: 'Name' },
-        { key: 'subject', label: 'Subject', render: (item: Grade) => item.subject || '-' },
-        { key: 'level', label: 'Level', render: (item: Grade) => item.level || '-' },
         {
             key: 'institution',
             label: 'Institution',
@@ -208,27 +200,6 @@ export const MyGrades: React.FC = () => {
                                     rows={3}
                                     placeholder="Brief description of the grade"
                                 />
-                            </div>
-
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Subject</label>
-                                    <input
-                                        type="text"
-                                        value={gradeForm.subject}
-                                        onChange={(e) => setGradeForm({ ...gradeForm, subject: e.target.value })}
-                                        placeholder="e.g., Mathematics"
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Level</label>
-                                    <input
-                                        type="text"
-                                        value={gradeForm.level}
-                                        onChange={(e) => setGradeForm({ ...gradeForm, level: e.target.value })}
-                                        placeholder="e.g., Beginner, Intermediate"
-                                    />
-                                </div>
                             </div>
 
                             <div className="form-group">

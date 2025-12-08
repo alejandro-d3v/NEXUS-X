@@ -9,18 +9,39 @@ import {
     FaClipboardList,
     FaSignOutAlt,
     FaBars,
-    FaTimes
+    FaTimes,
+    FaChevronDown,
+    FaChevronRight
 } from 'react-icons/fa';
+import { ActivityType } from '../../types';
 
 export const TeacherLayout: React.FC = () => {
     const { user, logout } = useAuth();
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [activitiesOpen, setActivitiesOpen] = useState(false);
 
     const menuItems = [
         { path: '/teacher/dashboard', icon: FaHome, label: 'Dashboard' },
         { path: '/teacher/grades', icon: FaGraduationCap, label: 'My Grades' },
-        { path: '/teacher/activities', icon: FaClipboardList, label: 'Activities' },
+        { 
+            path: '/teacher/activities', 
+            icon: FaClipboardList, 
+            label: 'Activities',
+            hasSubmenu: true,
+            submenu: [
+                { path: '/teacher/activities', label: 'My Activities' },
+                { path: `/teacher/generate-activity?type=${ActivityType.EXAM}`, label: 'Generate Exam' },
+                { path: `/teacher/generate-activity?type=${ActivityType.SUMMARY}`, label: 'Generate Summary' },
+                { path: `/teacher/generate-activity?type=${ActivityType.LESSON_PLAN}`, label: 'Generate Lesson Plan' },
+                { path: `/teacher/generate-activity?type=${ActivityType.QUIZ}`, label: 'Generate Quiz' },
+                { path: `/teacher/generate-activity?type=${ActivityType.FLASHCARDS}`, label: 'Generate Flashcards' },
+                { path: `/teacher/generate-activity?type=${ActivityType.ESSAY}`, label: 'Generate Essay' },
+                { path: `/teacher/generate-activity?type=${ActivityType.WORKSHEET}`, label: 'Generate Worksheet' },
+                { path: `/teacher/generate-activity?type=${ActivityType.PROJECT}`, label: 'Generate Project' },
+                { path: `/teacher/generate-activity?type=${ActivityType.RUBRIC}`, label: 'Generate Rubric' },
+            ]
+        },
         { path: '/teacher/invitations', icon: FaTicketAlt, label: 'Invitations' },
         { path: '/teacher/students', icon: FaUsers, label: 'Students' },
     ];
@@ -43,14 +64,46 @@ export const TeacherLayout: React.FC = () => {
 
                 <nav className="sidebar-nav">
                     {menuItems.map((item) => (
-                        <Link
-                            key={item.path}
-                            to={item.path}
-                            className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
-                        >
-                            <item.icon className="nav-icon" />
-                            {sidebarOpen && <span className="nav-label">{item.label}</span>}
-                        </Link>
+                        <div key={item.path}>
+                            {item.hasSubmenu ? (
+                                <>
+                                    <button
+                                        className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
+                                        onClick={() => setActivitiesOpen(!activitiesOpen)}
+                                        style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer' }}
+                                    >
+                                        <item.icon className="nav-icon" />
+                                        {sidebarOpen && (
+                                            <>
+                                                <span className="nav-label">{item.label}</span>
+                                                {activitiesOpen ? <FaChevronDown style={{ marginLeft: 'auto' }} /> : <FaChevronRight style={{ marginLeft: 'auto' }} />}
+                                            </>
+                                        )}
+                                    </button>
+                                    {activitiesOpen && sidebarOpen && (
+                                        <div className="submenu">
+                                            {item.submenu?.map((subitem) => (
+                                                <Link
+                                                    key={subitem.path}
+                                                    to={subitem.path}
+                                                    className={`nav-item submenu-item ${isActive(subitem.path) ? 'active' : ''}`}
+                                                >
+                                                    <span className="nav-label">{subitem.label}</span>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <Link
+                                    to={item.path}
+                                    className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
+                                >
+                                    <item.icon className="nav-icon" />
+                                    {sidebarOpen && <span className="nav-label">{item.label}</span>}
+                                </Link>
+                            )}
+                        </div>
                     ))}
                 </nav>
 

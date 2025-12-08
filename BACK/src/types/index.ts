@@ -16,6 +16,10 @@ export enum ActivityType {
   GAME = 'GAME',
   CHATBOT = 'CHATBOT',
   WRITING_CORRECTION = 'WRITING_CORRECTION',
+  FLASHCARDS = 'FLASHCARDS',
+  ESSAY = 'ESSAY',
+  WORKSHEET = 'WORKSHEET',
+  PROJECT = 'PROJECT',
 }
 
 export enum ActivityVisibility {
@@ -114,7 +118,7 @@ export interface Activity {
   visibility: ActivityVisibility;
   content: any;
   subject: string;
-  grade: string;
+  gradeLevel?: string; // Educational level metadata (e.g., "Secundaria", "Primaria")
   aiProvider: AIProvider;
   creditCost: number;
   userId: string;
@@ -145,6 +149,8 @@ export interface AIGenerationRequest {
   subject: string;
   grade?: string; // Now optional
   additionalParams?: ExamParams | Record<string, any>;
+  pdfContext?: string;
+  pdfFileName?: string;
 }
 
 export interface ExamParams {

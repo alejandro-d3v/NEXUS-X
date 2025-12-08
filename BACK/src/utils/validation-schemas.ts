@@ -17,7 +17,7 @@ export const loginSchema = Joi.object({
 });
 
 export const generateActivitySchema = Joi.object({
-  prompt: Joi.string().required(),
+  prompt: Joi.string().allow('').required(), // Allow empty for auto-generation
   provider: Joi.string().valid('OPENAI', 'GEMINI', 'OLLAMA').required(),
   type: Joi.string().valid(
     'EXAM',
@@ -30,10 +30,14 @@ export const generateActivitySchema = Joi.object({
     'LESSON_PLAN',
     'GAME',
     'CHATBOT',
-    'WRITING_CORRECTION'
+    'WRITING_CORRECTION',
+    'FLASHCARDS',
+    'ESSAY',
+    'WORKSHEET',
+    'PROJECT'
   ).required(),
   subject: Joi.string().required(),
-  grade: Joi.string().required(),
+  gradeLevel: Joi.string().optional(), // Changed from 'grade' to 'gradeLevel' and made optional
   title: Joi.string().optional(),
   description: Joi.string().optional(),
   visibility: Joi.string().valid('PRIVATE', 'PUBLIC').optional(),
@@ -48,7 +52,7 @@ export const generateActivitySchema = Joi.object({
     cantidadPreguntas: Joi.number().optional(),
     cantidadOM: Joi.number().optional(),
     cantidadVF: Joi.number().optional(),
-    instruccionesAdicionales: Joi.string().optional(),
+    instruccionesAdicionales: Joi.string().allow('').optional(), // Allow empty strings
   }).optional(),
 });
 

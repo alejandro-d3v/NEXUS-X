@@ -29,5 +29,10 @@ export const activityService = {
 
   async deleteActivity(id: string): Promise<void> {
     await api.delete(`/activities/${id}`);
+  },
+
+  async assignToGrades(activityId: string, gradeIds: string[]): Promise<any> {
+    const response = await api.post(`/activities/${activityId}/assign`, { gradeIds });
+    return response.data;
   }
 };

@@ -25,6 +25,10 @@ enum ActivityType {
   GAME
   CHATBOT
   WRITING_CORRECTION
+  FLASHCARDS
+  ESSAY
+  WORKSHEET
+  PROJECT
 }
 
 enum ActivityVisibility {
@@ -69,6 +73,7 @@ model Activity {
   visibility  ActivityVisibility @default(PRIVATE)
   content     Json
   subject     String
+  gradeLevel  String?            // Educational level metadata (e.g., "Secundaria", "Primaria")
   aiProvider  AIProvider
   creditCost  Int
   userId      String

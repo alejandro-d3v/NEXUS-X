@@ -7,7 +7,7 @@ import { TeacherLayout } from './components/layouts/TeacherLayout';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
-import { GenerateActivity } from './pages/GenerateActivity';
+import { GenerateActivity as OldGenerateActivity } from './pages/GenerateActivity';
 import { PublicActivities } from './pages/PublicActivities';
 import { WelcomeCourse } from './pages/WelcomeCourse';
 import { UserRole } from './types';
@@ -28,6 +28,7 @@ import { CreateSummary } from './pages/teacher/CreateSummary';
 import { AssignActivity } from './pages/teacher/AssignActivity';
 import { MyActivities } from './pages/teacher/MyActivities';
 import { ActivityDetail } from './pages/teacher/ActivityDetail';
+import { GenerateActivity } from './pages/teacher/GenerateActivity';
 
 // Student pages
 import { StudentLayout } from './components/layouts/StudentLayout';
@@ -117,6 +118,7 @@ function App() {
             <Route path="students" element={<StudentRoster />} />
             <Route path="create-summary" element={<CreateSummary />} />
             <Route path="activities/:id/assign" element={<AssignActivity />} />
+            <Route path="generate-activity" element={<GenerateActivity />} />
           </Route>
 
           {/* Student Routes with Layout */}
@@ -139,7 +141,7 @@ function App() {
             path="/generate"
             element={
               <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.TEACHER]}>
-                <GenerateActivity />
+                <OldGenerateActivity />
               </ProtectedRoute>
             }
           />

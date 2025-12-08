@@ -151,13 +151,22 @@ export interface Activity {
   title: string;
   description?: string;
   type: ActivityType;
-  content: string;
+  content: any;
   visibility: ActivityVisibility;
+  subject: string;
+  gradeLevel?: string;
   aiProvider: AIProvider;
+  creditCost?: number;
   userId: string;
   user?: User;
   createdAt: string;
   updatedAt: string;
+  activityGrades?: Array<{
+    grade: {
+      id: string;
+      name: string;
+    };
+  }>;
 }
 
 export interface CreditHistory {
@@ -245,7 +254,7 @@ export interface GenerateActivityRequest {
   description?: string;
   type: ActivityType;
   visibility: ActivityVisibility;
-  aiProvider: AIProvider;
+  provider: AIProvider;
   prompt: string;
   subject?: string;
   gradeLevel?: string;
@@ -253,4 +262,17 @@ export interface GenerateActivityRequest {
   difficulty?: string;
   language?: string;
   additionalInstructions?: string;
+  additionalParams?: {
+    titulo?: string;
+    descripcion?: string;
+    materia?: string;
+    nivelEducativo?: string;
+    idioma?: string;
+    duracion?: number;
+    dificultad?: string;
+    cantidadPreguntas?: number;
+    cantidadOM?: number;
+    cantidadVF?: number;
+    instruccionesAdicionales?: string;
+  };
 }

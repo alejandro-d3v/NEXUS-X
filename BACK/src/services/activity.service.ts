@@ -9,6 +9,7 @@ class ActivityService {
     visibility: ActivityVisibility;
     content: any;
     subject: string;
+    gradeLevel?: string;
     aiProvider: AIProvider;
     creditCost: number;
     userId: string;
@@ -77,12 +78,14 @@ class ActivityService {
   async getUserActivities(userId: string, filters?: {
     type?: ActivityType;
     subject?: string;
+    gradeLevel?: string;
   }) {
     return await prisma.activity.findMany({
       where: {
         userId,
         ...(filters?.type && { type: filters.type }),
         ...(filters?.subject && { subject: filters.subject }),
+        ...(filters?.gradeLevel && { gradeLevel: filters.gradeLevel }),
       },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -110,12 +113,14 @@ class ActivityService {
   async getPublicActivities(filters?: {
     type?: ActivityType;
     subject?: string;
+    gradeLevel?: string;
   }) {
     return await prisma.activity.findMany({
       where: {
         visibility: ActivityVisibility.PUBLIC,
         ...(filters?.type && { type: filters.type }),
         ...(filters?.subject && { subject: filters.subject }),
+        ...(filters?.gradeLevel && { gradeLevel: filters.gradeLevel }),
       },
       orderBy: { createdAt: 'desc' },
       include: {

@@ -17,6 +17,11 @@ export const activityService = {
     return response.data;
   },
 
+  async getPublicActivitiesForTeachers(): Promise<Activity[]> {
+    const response = await api.get<Activity[]>('/activities/public-teachers');
+    return response.data;
+  },
+
   async getActivity(id: string): Promise<Activity> {
     const response = await api.get<Activity>(`/activities/${id}`);
     return response.data;

@@ -114,10 +114,12 @@ class ActivityService {
     type?: ActivityType;
     subject?: string;
     gradeLevel?: string;
+    excludeUserId?: string;
   }) {
     return await prisma.activity.findMany({
       where: {
         visibility: ActivityVisibility.PUBLIC,
+        ...(filters?.excludeUserId && { userId: { not: filters.excludeUserId } }),
         ...(filters?.type && { type: filters.type }),
         ...(filters?.subject && { subject: filters.subject }),
         ...(filters?.gradeLevel && { gradeLevel: filters.gradeLevel }),

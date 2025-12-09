@@ -4,6 +4,7 @@ import {
   getActivity,
   getUserActivities,
   getPublicActivities,
+  getPublicActivitiesForTeachers,
   updateActivity,
   deleteActivity,
   generateSummary,
@@ -23,6 +24,7 @@ const router = Router();
 router.post('/generate', authenticate, validate(generateActivitySchema), generateContent);
 router.get('/my-activities', authenticate, getUserActivities);
 router.get('/public', getPublicActivities);
+router.get('/public-teachers', authenticate, authorize(UserRole.TEACHER), getPublicActivitiesForTeachers);
 router.get('/student', authenticate, authorize(UserRole.STUDENT), getStudentActivities);
 router.get('/:id', authenticate, getActivity);
 router.put('/:id', authenticate, validate(updateActivitySchema), updateActivity);

@@ -27,6 +27,7 @@ import { Invitations } from './pages/teacher/Invitations';
 import { CreateSummary } from './pages/teacher/CreateSummary';
 import { AssignActivity } from './pages/teacher/AssignActivity';
 import { MyActivities } from './pages/teacher/MyActivities';
+import { PublicActivitiesTeacher } from './pages/teacher/PublicActivitiesTeacher';
 import { ActivityDetail } from './pages/teacher/ActivityDetail';
 import { GenerateActivity } from './pages/teacher/GenerateActivity';
 
@@ -113,6 +114,7 @@ function App() {
             <Route path="dashboard" element={<TeacherDashboard />} />
             <Route path="grades" element={<MyGrades />} />
             <Route path="activities" element={<MyActivities />} />
+            <Route path="public-activities" element={<PublicActivitiesTeacher />} />
             <Route path="activities/:id" element={<ActivityDetail />} />
             <Route path="invitations" element={<Invitations />} />
             <Route path="students" element={<StudentRoster />} />

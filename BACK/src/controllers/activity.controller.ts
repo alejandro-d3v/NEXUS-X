@@ -172,6 +172,29 @@ export const getPublicActivities = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// Get public activities for teachers (excluding their own)
+export const getPublicActivitiesForTeachers = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { type, subject, gradeLevel } = req.query;
+
+    const activities = await activityService.getPublicActivities({
+      type: type as ActivityType,
+      subject: subject as string,
+      gradeLevel: gradeLevel as string,
+      excludeUserId: userId,
+    });
+
+    return res.json(activities);
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export const updateActivity = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;

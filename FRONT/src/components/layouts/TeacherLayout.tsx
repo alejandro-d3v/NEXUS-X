@@ -11,7 +11,8 @@ import {
     FaBars,
     FaTimes,
     FaChevronDown,
-    FaChevronRight
+    FaChevronRight,
+    FaCoins
 } from 'react-icons/fa';
 import { ActivityType } from '../../types';
 
@@ -31,6 +32,7 @@ export const TeacherLayout: React.FC = () => {
             hasSubmenu: true,
             submenu: [
                 { path: '/teacher/activities', label: 'My Activities' },
+                { path: '/teacher/public-activities', label: 'Public Activities' },
                 { path: `/teacher/generate-activity?type=${ActivityType.EXAM}`, label: 'Generate Exam' },
                 { path: `/teacher/generate-activity?type=${ActivityType.SUMMARY}`, label: 'Generate Summary' },
                 { path: `/teacher/generate-activity?type=${ActivityType.LESSON_PLAN}`, label: 'Generate Lesson Plan' },
@@ -108,6 +110,11 @@ export const TeacherLayout: React.FC = () => {
                 </nav>
 
                 <div className="sidebar-footer">
+                    <div className="credits-display">
+                        <FaCoins className="credits-icon" />
+                        {sidebarOpen && <span className="credits-label">Credits: {user?.credits || 0}</span>}
+                        {!sidebarOpen && <span className="credits-compact">{user?.credits || 0}</span>}
+                    </div>
                     <div className="user-info">
                         {sidebarOpen && (
                             <div className="user-details">

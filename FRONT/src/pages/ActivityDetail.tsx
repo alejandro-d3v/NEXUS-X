@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
+import { ExamViewer } from '../components/ExamViewer';
 import { activityService } from '../services/activity.service';
 import { exportService } from '../services/export.service';
 import { Activity } from '../types';
@@ -58,6 +59,19 @@ export const ActivityDetail: React.FC = () => {
     }
   };
 
+  const handleExportPdf = async () => {
+    if (!id) return;
+    setExporting(true);
+    try {
+      const blob = await exportService.exportToPdf(id);
+      exportService.downloadFile(blob, `${activity?.title || 'actividad'}.pdf`);
+    } catch (err) {
+      alert('Error al exportar a PDF');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!id || !confirm('¿Estás seguro de eliminar esta actividad?')) return;
 
@@ -95,6 +109,9 @@ export const ActivityDetail: React.FC = () => {
             <button onClick={handleExportExcel} disabled={exporting} style={styles.exportButton}>
               📊 Exportar Excel
             </button>
+            <button onClick={handleExportPdf} disabled={exporting} style={styles.exportButton}>
+              📑 Exportar PDF
+            </button>
             {isOwner && (
               <button onClick={handleDelete} style={styles.deleteButton}>
                 🗑️ Eliminar
@@ -110,38 +127,22 @@ export const ActivityDetail: React.FC = () => {
           </div>
         )}
 
-        {/* {activity.content?.examen && (
-          <div>
-            <h3>Tema: {activity.content.examen.tema}</h3>
-            <ol>
-              {activity.content.examen.preguntas.map((p: any, idx: number) => (
-                <li key={idx}>
-                  <p><strong>{p.tipo}:</strong> {p.text}</p>
-                  {p.tipo === 'Multiple Choice' && (
-                    <ul>
-                      {p.options.map((o: any, i: number) => (
-                        <li key={i}>{o.option}</li>
-                      ))}
-                    </ul>
-                  )}
-                  {p.tipo === 'True or False' && (
-                    <p>Respuesta: {p.answer ? 'Verdadero' : 'Falso'}</p>
-                  )}
-                </li>
-              ))}
-            </ol>
-          </div>
-        )} */}
 
-        <div style={styles.content}>
-          <h3>Contenido</h3>
-          <div style={styles.contentBox}>
-            <pre style={styles.pre}>
-              {JSON.stringify(activity.content, null, 2)}
-            </pre>
-            {/* <pre style={styles.pre}>{activity.content}</pre> */}
+        {/* Exam Content with ExamViewer */}
+        {activity.type === 'EXAM' ? (
+          <div style={styles.content}>
+            <ExamViewer content={activity.content} title={activity.title} />
           </div>
-        </div>
+        ) : (
+          <div style={styles.content}>
+            <h3>Contenido</h3>
+            <div style={styles.contentBox}>
+              <pre style={styles.pre}>
+                {JSON.stringify(activity.content, null, 2)}
+              </pre>
+            </div>
+          </div>
+        )}
 
         <div style={styles.footer}>
           <p>Creado por: {activity.user?.firstName} {activity.user?.lastName || 'Usuario'}</p>

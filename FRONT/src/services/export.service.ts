@@ -15,6 +15,13 @@ export const exportService = {
     return response.data;
   },
 
+  async exportToPdf(activityId: string): Promise<Blob> {
+    const response = await api.get(`/export/${activityId}/pdf`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
   downloadFile(blob: Blob, filename: string) {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');

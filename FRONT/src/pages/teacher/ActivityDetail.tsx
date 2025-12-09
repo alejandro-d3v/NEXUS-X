@@ -5,6 +5,9 @@ import toast from 'react-hot-toast';
 import { FaArrowLeft, FaFilePdf, FaSpinner, FaLink, FaTrash } from 'react-icons/fa';
 import api from '../../services/api';
 import { ExamViewer } from '../../components/ExamViewer';
+import { EmailViewer } from '../../components/EmailViewer';
+import { SurveyViewer } from '../../components/SurveyViewer';
+import { WritingCorrectionViewer } from '../../components/WritingCorrectionViewer';
 import { exportService } from '../../services/export.service';
 
 interface Activity {
@@ -112,6 +115,33 @@ export const ActivityDetail: React.FC = () => {
             return (
                 <div className="activity-content-exam">
                     <ExamViewer content={activity.content} title={activity.title} />
+                </div>
+            );
+        }
+
+        // Handle EMAIL type with EmailViewer
+        if (activity.type === 'EMAIL') {
+            return (
+                <div className="activity-content-email">
+                    <EmailViewer content={activity.content} title={activity.title} />
+                </div>
+            );
+        }
+
+        // Handle SURVEY type with SurveyViewer
+        if (activity.type === 'SURVEY') {
+            return (
+                <div className="activity-content-survey">
+                    <SurveyViewer content={activity.content} title={activity.title} />
+                </div>
+            );
+        }
+
+        // Handle WRITING_CORRECTION type with WritingCorrectionViewer
+        if (activity.type === 'WRITING_CORRECTION') {
+            return (
+                <div className="activity-content-correction">
+                    <WritingCorrectionViewer content={activity.content} title={activity.title} />
                 </div>
             );
         }

@@ -26,6 +26,20 @@ export const GenerateActivity: React.FC = () => {
     cantidadPreguntas: 10,
     cantidadOM: 5,
     cantidadVF: 5,
+    // Campos específicos para EMAIL
+    emailPurpose: 'formal',
+    emailTone: 'profesional',
+    emailRecipient: '',
+    emailContext: '',
+    // Campos específicos para SURVEY
+    surveyType: 'opinion',
+    numberOfQuestions: 5,
+    includeOpenQuestions: true,
+    includeMultipleChoice: true,
+    includeScale: false,
+    // Campos específicos para WRITING_CORRECTION
+    textToCorrect: '',
+    correctionType: 'all',
   });
 
   const [loading, setLoading] = useState(false);
@@ -75,6 +89,38 @@ export const GenerateActivity: React.FC = () => {
           if (formData.title) parts.push(`\\nTítulo: ${formData.title}`);
           if (formData.description) parts.push(`\\nDescripción: ${formData.description}`);
           if (formData.additionalInstructions) parts.push(`\\nInstrucciones adicionales: ${formData.additionalInstructions}`);
+        } else if (formData.type === ActivityType.EMAIL) {
+          parts.push(`Genera un correo electrónico ${formData.emailPurpose} con tono ${formData.emailTone}`);
+          if (formData.emailRecipient) parts.push(`\\nDestinatario: ${formData.emailRecipient}`);
+          if (formData.subject) parts.push(`\\nTema: ${formData.subject}`);
+          if (formData.emailContext) parts.push(`\\nContexto: ${formData.emailContext}`);
+          parts.push('\\nIncluye: asunto apropiado, saludo, cuerpo del mensaje y despedida formal');
+          if (formData.description) parts.push(`\\nDetalles adicionales: ${formData.description}`);
+        } else if (formData.type === ActivityType.SURVEY) {
+          parts.push(`Genera una encuesta de ${formData.surveyType} con ${formData.numberOfQuestions} preguntas`);
+          if (formData.subject) parts.push(`sobre ${formData.subject}`);
+          if (formData.gradeLevel) parts.push(`para nivel ${formData.gradeLevel}`);
+          parts.push('\\nIncluir tipos de pregunta:');
+          if (formData.includeMultipleChoice) parts.push('- Opción múltiple');
+          if (formData.includeOpenQuestions) parts.push('- Preguntas abiertas');
+          if (formData.includeScale) parts.push('- Escalas de valoración (1-5)');
+          if (formData.description) parts.push(`\\nDescripción: ${formData.description}`);
+        } else if (formData.type === ActivityType.WRITING_CORRECTION) {
+          parts.push('Corrige el siguiente texto');
+          if (formData.correctionType === 'all') {
+            parts.push('enfocándose en: ortografía, gramática, puntuación y estilo');
+          } else if (formData.correctionType === 'grammar') {
+            parts.push('enfocándose únicamente en gramática');
+          } else if (formData.correctionType === 'spelling') {
+            parts.push('enfocándose únicamente en ortografía');
+          } else if (formData.correctionType === 'style') {
+            parts.push('enfocándose únicamente en estilo');
+          }
+          parts.push(`\\nTexto a corregir:\\n${formData.textToCorrect}`);
+          parts.push('\\nProporciona:');
+          parts.push('1. Texto corregido completo');
+          parts.push('2. Lista de errores encontrados con explicaciones');
+          parts.push('3. Sugerencias de mejora');
         } else {
           parts.push(`Genera un(a) ${formData.type.toLowerCase()}`);
           if (formData.subject) parts.push(`sobre ${formData.subject}`);
@@ -194,6 +240,9 @@ export const GenerateActivity: React.FC = () => {
               <option value={ActivityType.WORKSHEET}>Hoja de Trabajo</option>
               <option value={ActivityType.PROJECT}>Proyecto</option>
               <option value={ActivityType.RUBRIC}>Rúbrica</option>
+              <option value={ActivityType.EMAIL}>Correo Electrónico</option>
+              <option value={ActivityType.SURVEY}>Encuesta</option>
+              <option value={ActivityType.WRITING_CORRECTION}>Corrección de Escritura</option>
             </select>
           </div>
 
@@ -347,6 +396,196 @@ export const GenerateActivity: React.FC = () => {
                 ⚠️ {validationError}
               </div>
             )}
+          </>
+        )}
+
+        {/* Campos específicos para EMAIL */}
+        {formData.type === ActivityType.EMAIL && (
+          <>
+            <div style={{ marginTop: '1.5rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid #1a1a2e' }}>
+              <h3>Configuración del Correo Electr ónico</h3>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Propósito del Correo *</label>
+                <select
+                  name="emailPurpose"
+                  value={formData.emailPurpose}
+                  onChange={handleChange}
+                  className="form-select"
+                  required
+                >
+                  <option value="formal">Formal</option>
+                  <option value="informal">Informal</option>
+                  <option value="comercial">Comercial</option>
+                  <option value="academico">Académico</option>
+                  <option value="agradecimiento">Agradecimiento</option>
+                  <option value="solicitud">Solicitud</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Tono *</label>
+                <select
+                  name="emailTone"
+                  value={formData.emailTone}
+                  onChange={handleChange}
+                  className="form-select"
+                  required
+                >
+                  <option value="profesional">Profesional</option>
+                  <option value="amigable">Amigable</option>
+                  <option value="formal">Formal</option>
+                  <option value="casual">Casual</option>
+                  <option value="persuasivo">Persuasivo</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Destinatario</label>
+                <input
+                  type="text"
+                  name="emailRecipient"
+                  value={formData.emailRecipient}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Ej: Cliente, Profesor, Equipo"
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Contexto del Correo</label>
+              <textarea
+                name="emailContext"
+                value={formData.emailContext}
+                onChange={handleChange}
+                className="form-textarea"
+                rows={3}
+                placeholder="Describe el contexto o situación del correo..."
+              />
+            </div>
+          </>
+        )}
+
+        {/* Campos específicos para SURVEY */}
+        {formData.type === ActivityType.SURVEY && (
+          <>
+            <div style={{ marginTop: '1.5rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid #1a1a2e' }}>
+              <h3>Configuración de la Encuesta</h3>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Tipo de Encuesta *</label>
+                <select
+                  name="surveyType"
+                  value={formData.surveyType}
+                  onChange={handleChange}
+                  className="form-select"
+                  required
+                >
+                  <option value="satisfaccion">Satisfacción</option>
+                  <option value="opinion">Opinión</option>
+                  <option value="evaluacion">Evaluación</option>
+                  <option value="investigacion">Investigación</option>
+                  <option value="feedback">Feedback</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Número de Preguntas *</label>
+                <input
+                  type="number"
+                  name="numberOfQuestions"
+                  value={formData.numberOfQuestions}
+                  onChange={handleChange}
+                  min="1"
+                  max="50"
+                  required
+                  className="form-input"
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Tipos de Preguntas a Incluir</label>
+              <div style={{ marginTop: '0.75rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    name="includeMultipleChoice"
+                    checked={formData.includeMultipleChoice}
+                    onChange={(e) => setFormData({ ...formData, includeMultipleChoice: e.target.checked })}
+                    style={{ marginRight: '0.5rem' }}
+                  />
+                  Opción Múltiple
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    name="includeOpenQuestions"
+                    checked={formData.includeOpenQuestions}
+                    onChange={(e) => setFormData({ ...formData, includeOpenQuestions: e.target.checked })}
+                    style={{ marginRight: '0.5rem' }}
+                  />
+                  Preguntas Abiertas
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    name="includeScale"
+                    checked={formData.includeScale}
+                    onChange={(e) => setFormData({ ...formData, includeScale: e.target.checked })}
+                    style={{ marginRight: '0.5rem' }}
+                  />
+                  Escalas de Valoración (1-5)
+                </label>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Campos específicos para WRITING_CORRECTION */}
+        {formData.type === ActivityType.WRITING_CORRECTION && (
+          <>
+            <div style={{ marginTop: '1.5rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid #1a1a2e' }}>
+              <h3>Configuración de Corrección de Escritura</h3>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Tipo de Corrección *</label>
+              <select
+                name="correctionType"
+                value={formData.correctionType}
+                onChange={handleChange}
+                className="form-select"
+                required
+              >
+                <option value="all">Corrección Completa (Ortografía, Gramática, Estilo)</option>
+                <option value="spelling">Solo Ortografía</option>
+                <option value="grammar">Solo Gramática</option>
+                <option value="style">Solo Estilo y Redacción</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Texto a Corregir *</label>
+              <textarea
+                name="textToCorrect"
+                value={formData.textToCorrect}
+                onChange={handleChange}
+                className="form-textarea"
+                rows={8}
+                required
+                placeholder="Pega aquí el texto que deseas corregir..."
+                style={{ fontFamily: 'monospace', fontSize: '0.95rem' }}
+              />
+              <small style={{ color: '#666', marginTop: '0.5rem', display: 'block' }}>
+                {formData.textToCorrect.length} caracteres
+              </small>
+            </div>
           </>
         )}
 

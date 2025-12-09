@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
-import { FaArrowLeft, FaFileWord, FaFilePdf, FaSpinner } from 'react-icons/fa';
+import { FaArrowLeft, FaFilePdf, FaSpinner } from 'react-icons/fa';
 import api from '../../services/api';
+import { ExamViewer } from '../../components/ExamViewer';
+import { exportService } from '../../services/export.service';
 
 interface Activity {
     id: string;
@@ -29,6 +31,7 @@ export const StudentActivityDetail: React.FC = () => {
 
     const [activity, setActivity] = useState<Activity | null>(null);
     const [loading, setLoading] = useState(true);
+    const [exporting, setExporting] = useState(false);
 
     useEffect(() => {
         loadActivity();
@@ -47,12 +50,18 @@ export const StudentActivityDetail: React.FC = () => {
         }
     };
 
-    const exportToWord = () => {
-        toast.success('Exportación a WORD próximamente');
-    };
-
-    const exportToPDF = () => {
-        toast.success('Exportación a PDF próximamente');
+    const exportToPDF = async () => {
+        if (!id) return;
+        setExporting(true);
+        try {
+            const blob = await exportService.exportToPdf(id);
+            exportService.downloadFile(blob, `${activity?.title || 'actividad'}.pdf`);
+            toast.success('Exportado a PDF exitosamente');
+        } catch (err) {
+            toast.error('Error al exportar a PDF');
+        } finally {
+            setExporting(false);
+        }
     };
 
     if (loading) {
@@ -80,6 +89,15 @@ export const StudentActivityDetail: React.FC = () => {
     }
 
     const renderContent = () => {
+        // Handle EXAM type with ExamViewer
+        if (activity.type === 'EXAM') {
+            return (
+                <div className="activity-content-exam">
+                    <ExamViewer content={activity.content} title={activity.title} />
+                </div>
+            );
+        }
+
         if (activity.type === 'SUMMARY') {
             let content = activity.content;
 
@@ -200,10 +218,7 @@ export const StudentActivityDetail: React.FC = () => {
                 </div>
 
                 <div className="header-actions">
-                    <button onClick={exportToWord} className="btn btn-secondary">
-                        <FaFileWord /> Exportar WORD
-                    </button>
-                    <button onClick={exportToPDF} className="btn btn-secondary">
+                    <button onClick={exportToPDF} disabled={exporting} className="btn btn-secondary">
                         <FaFilePdf /> Exportar PDF
                     </button>
                 </div>

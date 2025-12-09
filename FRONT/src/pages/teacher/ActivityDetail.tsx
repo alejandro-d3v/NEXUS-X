@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
-import { FaArrowLeft, FaFileWord, FaFilePdf, FaSpinner, FaLink, FaTrash, FaFileExcel } from 'react-icons/fa';
+import { FaArrowLeft, FaFilePdf, FaSpinner, FaLink, FaTrash } from 'react-icons/fa';
 import api from '../../services/api';
 import { ExamViewer } from '../../components/ExamViewer';
 import { exportService } from '../../services/export.service';
@@ -65,34 +65,6 @@ export const ActivityDetail: React.FC = () => {
             navigate('/teacher/activities');
         } catch (error: any) {
             toast.error('Error al eliminar actividad');
-        }
-    };
-
-    const exportToWord = async () => {
-        if (!id) return;
-        setExporting(true);
-        try {
-            const blob = await exportService.exportToWord(id);
-            exportService.downloadFile(blob, `${activity?.title || 'actividad'}.docx`);
-            toast.success('Exportado a Word exitosamente');
-        } catch (err) {
-            toast.error('Error al exportar a Word');
-        } finally {
-            setExporting(false);
-        }
-    };
-
-    const exportToExcel = async () => {
-        if (!id) return;
-        setExporting(true);
-        try {
-            const blob = await exportService.exportToExcel(id);
-            exportService.downloadFile(blob, `${activity?.title || 'actividad'}.xlsx`);
-            toast.success('Exportado a Excel exitosamente');
-        } catch (err) {
-            toast.error('Error al exportar a Excel');
-        } finally {
-            setExporting(false);
         }
     };
 
@@ -308,12 +280,6 @@ export const ActivityDetail: React.FC = () => {
                 </div>
 
                 <div className="header-actions">
-                    <button onClick={exportToWord} disabled={exporting} className="btn btn-secondary">
-                        <FaFileWord /> Exportar WORD
-                    </button>
-                    <button onClick={exportToExcel} disabled={exporting} className="btn btn-secondary">
-                        <FaFileExcel /> Exportar Excel
-                    </button>
                     <button onClick={exportToPDF} disabled={exporting} className="btn btn-secondary">
                         <FaFilePdf /> Exportar PDF
                     </button>

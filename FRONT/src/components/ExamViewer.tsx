@@ -14,11 +14,18 @@ interface ExamMetadata {
 }
 
 interface ExamQuestion {
-  id: number;
-  tipo: 'opcion_multiple' | 'verdadero_falso';
-  enunciado: string;
+  id?: number;
+  tipo?: 'opcion_multiple' | 'verdadero_falso';
+  type?: 'multiple_choice' | 'true_false';
+  enunciado?: string;
+  pregunta?: string;  // Campo usado por quiz
+  question?: string;
+  text?: string;
   opciones?: string[];
+  options?: string[] | any[];
+  respuesta?: string;  // Respuesta del quiz
   respuesta_correcta?: number | boolean;
+  correct_answer?: number | boolean;
 }
 
 interface ExamContent {
@@ -32,7 +39,35 @@ interface ExamViewerProps {
 }
 
 export const ExamViewer: React.FC<ExamViewerProps> = ({ content, title }) => {
-  const { meta, preguntas } = content;
+  // Handle null/undefined content
+  if (!content) {
+    return (
+      <div style={styles.container}>
+        <p style={styles.noQuestions}>No hay contenido disponible para mostrar.</p>
+      </div>
+    );
+  }
+
+  const meta = content.meta || {};
+  const preguntas = content.preguntas || [];
+
+  // If no questions, show message
+  if (!preguntas || preguntas.length === 0) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.header}>
+          <h2 style={styles.title}>{title || meta.titulo || 'Examen'}</h2>
+        </div>
+        <p style={styles.noQuestions}>No se encontraron preguntas en este contenido.</p>
+        <details style={{ marginTop: '1rem', padding: '1rem', background: '#f5f5f5' }}>
+          <summary>Ver contenido raw (debug)</summary>
+          <pre style={{ fontSize: '0.8rem', overflow: 'auto' }}>
+            {JSON.stringify(content, null, 2)}
+          </pre>
+        </details>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
@@ -87,40 +122,75 @@ export const ExamViewer: React.FC<ExamViewerProps> = ({ content, title }) => {
       {/* Questions Section */}
       <div style={styles.questionsContainer}>
         {preguntas && preguntas.length > 0 ? (
-          preguntas.map((pregunta, index) => (
-            <div key={pregunta.id || index} style={styles.questionCard}>
-              <div style={styles.questionHeader}>
-                <span style={styles.questionNumber}>{index + 1}.</span>
-                <span style={styles.questionText}>{pregunta.enunciado}</span>
-              </div>
+          preguntas.map((pregunta, index) => {
+            // Handle both Spanish and English field names
+            const questionText = pregunta.pregunta || pregunta.enunciado || pregunta.question || pregunta.text || '';
+            const questionType = pregunta.tipo || pregunta.type || '';
+            const options = pregunta.opciones || pregunta.options || [];
+            const answer = pregunta.respuesta || '';  // For quiz-style questions
 
-              {pregunta.tipo === 'opcion_multiple' && pregunta.opciones && (
-                <div style={styles.optionsContainer}>
-                  {pregunta.opciones.map((opcion, i) => (
-                    <div key={i} style={styles.optionItem}>
-                      <span style={styles.optionLetter}>
-                        {String.fromCharCode(97 + i)})
-                      </span>
-                      <span style={styles.optionText}>{opcion}</span>
+            // Debug: if questionText is empty, show the raw object
+            const hasContent = questionText.trim().length > 0;
+
+            return (
+              <div key={pregunta.id || index} style={styles.questionCard}>
+                <div style={styles.questionHeader}>
+                  <span style={styles.questionNumber}>{index + 1}.</span>
+                  <span style={styles.questionText}>{questionText}</span>
+                </div>
+
+                {!hasContent && (
+                  <div style={{ background: '#fff3cd', padding: '10px', borderRadius: '4px', marginBottom: '10px', fontSize: '0.85rem' }}>
+                    <strong>⚠️ Debug - Pregunta vacía:</strong>
+                    <pre style={{ fontSize: '0.75rem', overflow: 'auto', marginTop: '5px' }}>
+                      {JSON.stringify(pregunta, null, 2)}
+                    </pre>
+                  </div>
+                )}
+
+                {/* Show answer if it exists and no options (quiz format) */}
+                {answer && !options.length && (
+                  <div style={{ ...styles.optionsContainer, borderLeft: '3px solid #2196F3' }}>
+                    <div style={{ padding: '10px', background: '#e3f2fd', borderRadius: '4px' }}>
+                      <strong style={{ color: '#1976d2' }}>Respuesta:</strong>
+                      <p style={{ margin: '5px 0 0 0', color: '#333' }}>{answer}</p>
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                )}
 
-              {pregunta.tipo === 'verdadero_falso' && (
-                <div style={styles.trueFalseContainer}>
-                  <div style={styles.trueFalseOption}>
-                    <span style={styles.checkbox}>☐</span>
-                    <span style={styles.trueFalseLabel}>Verdadero</span>
+                {(questionType === 'opcion_multiple' || questionType === 'multiple_choice') && options && options.length > 0 && (
+                  <div style={styles.optionsContainer}>
+                    {options.map((opcion: any, i: number) => {
+                      // Handle both string options and object options
+                      const optionText = typeof opcion === 'string' ? opcion : (opcion.text || opcion.option || '');
+
+                      return (
+                        <div key={i} style={styles.optionItem}>
+                          <span style={styles.optionLetter}>
+                            {String.fromCharCode(97 + i)})
+                          </span>
+                          <span style={styles.optionText}>{optionText}</span>
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div style={styles.trueFalseOption}>
-                    <span style={styles.checkbox}>☐</span>
-                    <span style={styles.trueFalseLabel}>Falso</span>
+                )}
+
+                {(questionType === 'verdadero_falso' || questionType === 'true_false') && (
+                  <div style={styles.trueFalseContainer}>
+                    <div style={styles.trueFalseOption}>
+                      <span style={styles.checkbox}>☐</span>
+                      <span style={styles.trueFalseLabel}>Verdadero</span>
+                    </div>
+                    <div style={styles.trueFalseOption}>
+                      <span style={styles.checkbox}>☐</span>
+                      <span style={styles.trueFalseLabel}>Falso</span>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          ))
+                )}
+              </div>
+            );
+          })
         ) : (
           <p style={styles.noQuestions}>No hay preguntas disponibles</p>
         )}

@@ -112,8 +112,8 @@ export const ActivityDetail: React.FC = () => {
     }
 
     const renderContent = () => {
-        // Handle EXAM type with ExamViewer
-        if (activity.type === 'EXAM') {
+        // Handle EXAM and QUIZ types with ExamViewer
+        if (activity.type === 'EXAM' || activity.type === 'QUIZ') {
             return (
                 <div className="activity-content-exam">
                     <ExamViewer content={activity.content} title={activity.title} />

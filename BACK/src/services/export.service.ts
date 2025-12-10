@@ -436,17 +436,32 @@ class ExportService {
     `;
 
     preguntas.forEach((pregunta: any, index: number) => {
-      html += `<div class="question">`;
-      html += `<div class="question-header">${index + 1}. ${pregunta.enunciado}</div>`;
+      // Handle both exam (enunciado) and quiz (pregunta) formats
+      const questionText = pregunta.pregunta || pregunta.enunciado || pregunta.question || '';
+      const questionType = pregunta.tipo || pregunta.type || '';
+      const options = pregunta.opciones || pregunta.options || [];
+      const answer = pregunta.respuesta || '';  // For quiz format
 
-      if (pregunta.tipo === 'opcion_multiple' && pregunta.opciones) {
+      html += `<div class="question">`;
+      html += `<div class="question-header">${index + 1}. ${questionText}</div>`;
+
+      // Show answer if exists (quiz format)
+      if (answer && !options.length) {
+        html += `<div class="options" style="border-left: 3px solid #2196F3; background: #e3f2fd;">
+          <strong style="color: #1976d2;">Respuesta:</strong>
+          <p style="margin: 5px 0 0 0; color: #333;">${answer}</p>
+        </div>`;
+      }
+
+      if ((questionType === 'opcion_multiple' || questionType === 'multiple_choice') && options.length > 0) {
         html += `<div class="options">`;
-        pregunta.opciones.forEach((opcion: string, i: number) => {
+        options.forEach((opcion: any, i: number) => {
+          const optionText = typeof opcion === 'string' ? opcion : (opcion.text || opcion.option || '');
           const letter = String.fromCharCode(97 + i);
-          html += `<div class="option">${letter}) ${opcion}</div>`;
+          html += `<div class="option">${letter}) ${optionText}</div>`;
         });
         html += `</div>`;
-      } else if (pregunta.tipo === 'verdadero_falso') {
+      } else if (questionType === 'verdadero_falso' || questionType === 'true_false') {
         html += `<div class="tf-question">Verdadero ( ) &nbsp;&nbsp;&nbsp; Falso ( )</div>`;
       }
 

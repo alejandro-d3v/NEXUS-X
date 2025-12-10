@@ -111,20 +111,20 @@ class ExportService {
 
     if (activity.type === 'EXAM' || activity.type === 'QUIZ') {
       worksheet.addRow({ field: 'Preguntas', value: '' });
-      
+
       activity.content.questions?.forEach((q: any, index: number) => {
         worksheet.addRow({ field: `Pregunta ${index + 1}`, value: q.question });
-        
+
         if (q.options) {
           q.options.forEach((opt: string, i: number) => {
             worksheet.addRow({ field: `  Opción ${String.fromCharCode(65 + i)}`, value: opt });
           });
         }
-        
+
         if (q.answer) {
           worksheet.addRow({ field: '  Respuesta', value: q.answer });
         }
-        
+
         worksheet.addRow({ field: '', value: '' });
       });
     } else {
@@ -137,7 +137,7 @@ class ExportService {
   async exportToPdf(activity: any): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       const html = this.generateExamHtml(activity);
-      
+
       const options: any = {
         format: 'Letter',
         border: {
@@ -159,6 +159,163 @@ class ExportService {
   }
 
   private generateExamHtml(activity: any): string {
+    const type = activity.type;
+
+    // Handle different activity types
+    if (type === 'WORD_SEARCH') {
+      return this.generateWordSearchHtml(activity);
+    } else if (type === 'EXAM' || type === 'QUIZ') {
+      return this.generateQuizExamHtml(activity);
+    } else if (type === 'SUMMARY') {
+      return this.generateSummaryHtml(activity);
+    } else if (type === 'EMAIL') {
+      return this.generateEmailHtml(activity);
+    } else if (type === 'SURVEY') {
+      return this.generateSurveyHtml(activity);
+    } else {
+      return this.generateGenericHtml(activity);
+    }
+  }
+
+  private generateWordSearchHtml(activity: any): string {
+    const content = activity.content;
+    const grid = content.grid || [];
+    const palabras = content.palabras || [];
+    const titulo = content.titulo || activity.title || 'Sopa de Letras';
+    const instrucciones = content.instrucciones || 'Encuentra todas las palabras listadas en la cuadrícula.';
+
+    let html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+            color: #333;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #1a1a2e;
+            padding-bottom: 20px;
+          }
+          .header h1 {
+            color: #1a1a2e;
+            margin: 0 0 10px 0;
+            font-size: 28px;
+          }
+          .instructions {
+            background: #f5f5f5;
+            padding: 15px;
+            border-left: 4px solid #4CAF50;
+            margin-bottom: 20px;
+            border-radius: 4px;
+          }
+          .grid-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+          }
+          table.wordsearch-grid {
+            border-collapse: collapse;
+            margin: 0 auto;
+          }
+          table.wordsearch-grid td {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #333;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+          }
+          .words-list {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+          }
+          .words-list h3 {
+            margin-top: 0;
+            color: #1a1a2e;
+          }
+          .words-list ul {
+            columns: 3;
+            -webkit-columns: 3;
+            -moz-columns: 3;
+            list-style: none;
+            padding: 0;
+          }
+          .words-list li {
+            padding: 5px 0;
+            font-weight: 500;
+          }
+          .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #ddd;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>${titulo}</h1>
+          ${activity.subject ? `<p>Materia: ${activity.subject}</p>` : ''}
+        </div>
+
+        <div class="instructions">
+          <strong>Instrucciones:</strong> ${instrucciones}
+        </div>
+
+        <div class="grid-container">
+          <table class="wordsearch-grid">
+            <tbody>
+    `;
+
+    // Generate grid
+    grid.forEach((row: string | string[]) => {
+      html += '<tr>';
+      const letters = typeof row === 'string' ? row.split('') : row;
+      letters.forEach((letter: string) => {
+        html += `<td>${letter}</td>`;
+      });
+      html += '</tr>';
+    });
+
+    html += `
+            </tbody>
+          </table>
+        </div>
+
+        <div class="words-list">
+          <h3>Palabras a encontrar:</h3>
+          <ul>
+    `;
+
+    palabras.forEach((palabra: string) => {
+      html += `<li>• ${palabra}</li>`;
+    });
+
+    html += `
+          </ul>
+        </div>
+
+        <div class="footer">
+          <p>Generado por NEXUS-X | ${new Date().toLocaleDateString()}</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    return html;
+  }
+
+  private generateQuizExamHtml(activity: any): string {
     const content = activity.content;
     const meta = content.meta || {};
     const preguntas = content.preguntas || [];
@@ -273,12 +430,6 @@ class ExportService {
               <div class="meta-value">${meta.dificultad}</div>
             </div>
           ` : ''}
-          ${meta.cantidad_preguntas ? `
-            <div class="meta-row">
-              <div class="meta-label">Total de Preguntas:</div>
-              <div class="meta-value">${meta.cantidad_preguntas}</div>
-            </div>
-          ` : ''}
         </div>
 
         <div class="questions">
@@ -291,7 +442,7 @@ class ExportService {
       if (pregunta.tipo === 'opcion_multiple' && pregunta.opciones) {
         html += `<div class="options">`;
         pregunta.opciones.forEach((opcion: string, i: number) => {
-          const letter = String.fromCharCode(97 + i); // a, b, c, d
+          const letter = String.fromCharCode(97 + i);
           html += `<div class="option">${letter}) ${opcion}</div>`;
         });
         html += `</div>`;
@@ -312,6 +463,158 @@ class ExportService {
     `;
 
     return html;
+  }
+
+  private generateSummaryHtml(activity: any): string {
+    const content = activity.content;
+    let summaryText = '';
+    if (content.summary) {
+      summaryText = Array.isArray(content.summary) ? content.summary.join('\n\n') : content.summary;
+    } else if (content.resumen) {
+      summaryText = Array.isArray(content.resumen) ? content.resumen.join('\n\n') : content.resumen;
+    }
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+          h1 { color: #1a1a2e; border-bottom: 3px solid #1a1a2e; padding-bottom: 10px; }
+          .summary-content { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <h1>${activity.title}</h1>
+        <div class="summary-content">
+          <p>${summaryText.replace(/\n/g, '</p><p>')}</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateEmailHtml(activity: any): string {
+    const content = activity.content;
+    const subject = content.subject || content.asunto || activity.title;
+    const greeting = content.greeting || content.saludo || '';
+    const body = content.body || content.cuerpo || '';
+    const closing = content.closing || content.despedida || '';
+    const signature = content.signature || content.firma || '';
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+          }
+          .email-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+          }
+          .email-header {
+            background: #f5f5f5;
+            padding: 20px;
+            border-bottom: 2px solid #1a1a2e;
+          }
+          .email-header strong {
+            color: #1a1a2e;
+            margin-right: 10px;
+          }
+          .email-body {
+            padding: 30px;
+            line-height: 1.8;
+          }
+          .email-greeting {
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+          }
+          .email-content p {
+            margin-bottom: 15px;
+            color: #333;
+          }
+          .email-closing {
+            margin-top: 30px;
+            padding-top: 15px;
+          }
+          .email-signature {
+            font-weight: bold;
+            margin-top: 10px;
+          }
+          .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #ddd;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="email-container">
+          <div class="email-header">
+            <strong>Asunto:</strong> ${subject}
+          </div>
+          
+          <div class="email-body">
+            ${greeting ? `<div class="email-greeting">${greeting}</div>` : ''}
+            
+            <div class="email-content">
+              ${body.split('\n').map((p: string) => `<p>${p}</p>`).join('')}
+            </div>
+            
+            ${closing || signature ? `
+              <div class="email-closing">
+                ${closing ? `<p>${closing}</p>` : ''}
+                ${signature ? `<p class="email-signature">${signature}</p>` : ''}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+
+        <div class="footer">
+          <p>Generado por NEXUS-X | ${new Date().toLocaleDateString()}</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private generateSurveyHtml(activity: any): string {
+    return this.generateGenericHtml(activity);
+  }
+
+  private generateGenericHtml(activity: any): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h1 { color: #1a1a2e; }
+          pre { background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto; }
+        </style>
+      </head>
+      <body>
+        <h1>${activity.title}</h1>
+        <p><strong>Tipo:</strong> ${activity.type}</p>
+        <p><strong>Materia:</strong> ${activity.subject}</p>
+        <h2>Contenido:</h2>
+        <pre>${JSON.stringify(activity.content, null, 2)}</pre>
+      </body>
+      </html>
+    `;
   }
 }
 

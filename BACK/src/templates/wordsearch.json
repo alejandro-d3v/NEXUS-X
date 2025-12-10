@@ -1,0 +1,26 @@
+{
+    "meta": {
+        "titulo": "",
+        "descripcion": "",
+        "materia": "",
+        "nivel_educativo": "",
+        "tema": "",
+        "dificultad": "",
+        "cantidad_palabras": 0,
+        "grid_size": 15
+    },
+    "palabras": [],
+    "grid": [],
+    "soluciones": [
+        {
+            "palabra": "",
+            "direccion": "",
+            "posiciones": [
+                {
+                    "fila": 0,
+                    "columna": 0
+                }
+            ]
+        }
+    ]
+}

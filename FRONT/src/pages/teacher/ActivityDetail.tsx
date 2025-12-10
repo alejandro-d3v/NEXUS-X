@@ -8,6 +8,7 @@ import { ExamViewer } from '../../components/ExamViewer';
 import { EmailViewer } from '../../components/EmailViewer';
 import { SurveyViewer } from '../../components/SurveyViewer';
 import { WritingCorrectionViewer } from '../../components/WritingCorrectionViewer';
+import { PlayWordSearch } from '../../components/PlayWordSearch';
 import { exportService } from '../../services/export.service';
 
 interface Activity {
@@ -142,6 +143,15 @@ export const ActivityDetail: React.FC = () => {
             return (
                 <div className="activity-content-correction">
                     <WritingCorrectionViewer content={activity.content} title={activity.title} />
+                </div>
+            );
+        }
+
+        // Handle WORD_SEARCH type with PlayWordSearch
+        if (activity.type === 'WORD_SEARCH') {
+            return (
+                <div className="activity-content-wordsearch">
+                    <PlayWordSearch content={activity.content} />
                 </div>
             );
         }

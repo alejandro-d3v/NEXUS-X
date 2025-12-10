@@ -29,6 +29,7 @@ enum ActivityType {
   ESSAY
   WORKSHEET
   PROJECT
+  WORD_SEARCH
 }
 
 enum ActivityVisibility {

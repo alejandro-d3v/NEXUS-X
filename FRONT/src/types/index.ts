@@ -20,6 +20,7 @@ export enum ActivityType {
   ESSAY = 'ESSAY',
   WORKSHEET = 'WORKSHEET',
   PROJECT = 'PROJECT',
+  WORD_SEARCH = 'WORD_SEARCH',
   OTHER = 'OTHER'
 }
 
@@ -279,5 +280,9 @@ export interface GenerateActivityRequest {
     cantidadOM?: number;
     cantidadVF?: number;
     instruccionesAdicionales?: string;
+    // Word search specific
+    tema?: string;
+    cantidadPalabras?: number;
+    gridSize?: number;
   };
 }

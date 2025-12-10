@@ -14,7 +14,7 @@ class GeminiService {
   async generate(request: AIGenerationRequest): Promise<AIGenerationResponse> {
     try {
       const model = this.client.getGenerativeModel({ model: 'gemini-pro' });
-      
+
       const systemPrompt = this.getSystemPrompt(request.type);
       const fullPrompt = `${systemPrompt}\n\n${request.prompt}\n\nResponde únicamente con JSON válido.`;
 
@@ -47,6 +47,7 @@ class GeminiService {
       GAME: 'Eres un asistente educativo experto en crear juegos educativos. Genera contenido de juego en formato JSON.',
       CHATBOT: 'Eres un asistente educativo experto en la materia solicitada. Responde de manera clara y pedagógica en formato JSON.',
       WRITING_CORRECTION: 'Eres un asistente educativo experto en corrección de escritura. Analiza y corrige el texto en formato JSON.',
+      WORD_SEARCH: 'Eres un asistente educativo experto en crear sopas de letras educativas. Genera el grid, las palabras y sus posiciones en formato JSON.',
     };
 
     return prompts[type] || 'Eres un asistente educativo. Genera contenido en formato JSON.';

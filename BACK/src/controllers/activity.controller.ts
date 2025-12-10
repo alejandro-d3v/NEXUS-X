@@ -56,6 +56,22 @@ export const generateContent = async (req: AuthRequest, res: Response) => {
         if (title) parts.push(`\nTítulo: ${title}`);
         if (description) parts.push(`\nDescripción: ${description}`);
         if (params?.instruccionesAdicionales) parts.push(`\nInstrucciones adicionales: ${params.instruccionesAdicionales}`);
+      } else if (type === 'WORD_SEARCH') {
+        // Load word search template
+        const fs = require('fs');
+        const path = require('path');
+        const templatePath = path.join(__dirname, '../prompts/wordsearch.prompt.md');
+        let template = fs.readFileSync(templatePath, 'utf-8');
+
+        // Replace placeholders
+        template = template.replace('{tema}', params?.tema || subject || 'tema general');
+        template = template.replace('{materia}', params?.materia || subject || 'educación');
+        template = template.replace('{nivelEducativo}', params?.nivelEducativo || gradeLevel || 'general');
+        template = template.replace(/{cantidadPalabras}/g, params?.cantidadPalabras || 10);
+        template = template.replace(/{gridSize}/g, params?.gridSize || 15);
+        template = template.replace(/{dificultad}/g, params?.dificultad || 'Medio');
+
+        prompt = template;
       } else {
         parts.push(`Genera un(a) ${type.toLowerCase()}`);
         if (subject) parts.push(`sobre ${subject}`);

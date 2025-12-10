@@ -30,6 +30,7 @@ import { MyActivities } from './pages/teacher/MyActivities';
 import { PublicActivitiesTeacher } from './pages/teacher/PublicActivitiesTeacher';
 import { ActivityDetail } from './pages/teacher/ActivityDetail';
 import { GenerateActivity } from './pages/teacher/GenerateActivity';
+import { GenerateWordSearch } from './pages/teacher/GenerateWordSearch';
 
 // Student pages
 import { StudentLayout } from './components/layouts/StudentLayout';
@@ -121,6 +122,7 @@ function App() {
             <Route path="create-summary" element={<CreateSummary />} />
             <Route path="activities/:id/assign" element={<AssignActivity />} />
             <Route path="generate-activity" element={<GenerateActivity />} />
+            <Route path="generate-wordsearch" element={<GenerateWordSearch />} />
           </Route>
 
           {/* Student Routes with Layout */}

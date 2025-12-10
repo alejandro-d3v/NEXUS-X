@@ -34,7 +34,8 @@ export const generateActivitySchema = Joi.object({
     'FLASHCARDS',
     'ESSAY',
     'WORKSHEET',
-    'PROJECT'
+    'PROJECT',
+    'WORD_SEARCH'
   ).required(),
   subject: Joi.string().allow('').optional(), // Allow empty for activities that don't need it
   gradeLevel: Joi.string().allow('').optional(), // Allow empty strings
@@ -53,6 +54,10 @@ export const generateActivitySchema = Joi.object({
     cantidadOM: Joi.number().optional(),
     cantidadVF: Joi.number().optional(),
     instruccionesAdicionales: Joi.string().allow('').optional(), // Allow empty strings
+    // Word search specific
+    tema: Joi.string().optional(),
+    cantidadPalabras: Joi.number().optional(),
+    gridSize: Joi.number().optional(),
   }).optional(),
 });
 

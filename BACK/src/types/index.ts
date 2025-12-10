@@ -20,6 +20,7 @@ export enum ActivityType {
   ESSAY = 'ESSAY',
   WORKSHEET = 'WORKSHEET',
   PROJECT = 'PROJECT',
+  WORD_SEARCH = 'WORD_SEARCH',
 }
 
 export enum ActivityVisibility {

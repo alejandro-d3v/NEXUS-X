@@ -107,6 +107,11 @@ export const TeacherDashboard: React.FC = () => {
                         <h3>View Students</h3>
                         <p>See all enrolled students</p>
                     </Link>
+                    <Link to="/teacher/generate-wordsearch" className="action-card">
+                        <span className="action-icon" style={{ fontSize: '1.5rem' }}>🔤</span>
+                        <h3>Sopa de Letras</h3>
+                        <p>Generate word search puzzle</p>
+                    </Link>
                 </div>
             </div>
 

@@ -40,6 +40,12 @@ export const GenerateActivity: React.FC = () => {
     // Campos específicos para WRITING_CORRECTION
     textToCorrect: '',
     correctionType: 'all',
+    // Campos específicos para CHATBOT
+    chatbotTopic: '',
+    chatbotPersonality: 'profesional',
+    chatbotKnowledgeLevel: 'experto',
+    chatbotLanguage: 'Español',
+    chatbotInstructions: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -124,6 +130,42 @@ export const GenerateActivity: React.FC = () => {
           parts.push('  "errores": [{"descripcion": "palabra/frase errónea", "correccion": "corrección", "explicacion": "explicación del error"}],');
           parts.push('  "sugerencias_de_mejora": ["sugerencia 1", "sugerencia 2"]');
           parts.push('}');
+        } else if (formData.type === ActivityType.CHATBOT) {
+          // Build chatbot system prompt with topic validation
+          const systemParts = [];
+          systemParts.push(`Eres un chatbot experto en ${formData.chatbotTopic}.`);
+          systemParts.push(`Tu función es ayudar a estudiantes y profesores respondiendo SOLO preguntas relacionadas con ${formData.chatbotTopic}.`);
+          systemParts.push('');
+          systemParts.push('**IMPORTANTE - VALIDACIÓN DE CONTEXTO:**');
+          systemParts.push(`Si alguien te pregunta sobre temas NO relacionados con ${formData.chatbotTopic}, debes RECHAZAR educadamente la pregunta.`);
+          systemParts.push('');
+          systemParts.push('**Ejemplos de rechazo:**');
+          systemParts.push(`- "Lo siento, soy un experto en ${formData.chatbotTopic}. Solo puedo ayudarte con preguntas sobre este tema específico."`);
+          systemParts.push(`- "Esa pregunta no está relacionada con ${formData.chatbotTopic}. ¿Tienes alguna pregunta sobre ${formData.chatbotTopic}?"`);
+          systemParts.push('');
+          systemParts.push(`**Personalidad:** ${formData.chatbotPersonality}`);
+          systemParts.push(`**Nivel de conocimiento:** ${formData.chatbotKnowledgeLevel}`);
+          systemParts.push(`**Idioma:** ${formData.chatbotLanguage}`);
+          
+          if (formData.chatbotInstructions) {
+            systemParts.push('');
+            systemParts.push('**Instrucciones especiales:**');
+            systemParts.push(formData.chatbotInstructions);
+          }
+
+          const systemPrompt = systemParts.join('\\n');
+          const welcomeMessage = `¡Hola! Soy tu asistente experto en ${formData.chatbotTopic}. ¿En qué puedo ayudarte hoy?`;
+
+          // Generate JSON structure for chatbot config
+          parts.push('Genera la configuración del chatbot en formato JSON:');
+          parts.push(JSON.stringify({
+            topic: formData.chatbotTopic,
+            personality: formData.chatbotPersonality,
+            knowledgeLevel: formData.chatbotKnowledgeLevel,
+            language: formData.chatbotLanguage,
+            systemPrompt: systemPrompt,
+            welcomeMessage: welcomeMessage
+          }, null, 2));
         } else {
           parts.push(`Genera un(a) ${formData.type.toLowerCase()}`);
           if (formData.subject) parts.push(`sobre ${formData.subject}`);
@@ -308,6 +350,7 @@ export const GenerateActivity: React.FC = () => {
               <option value={ActivityType.EMAIL}>Correo Electrónico</option>
               <option value={ActivityType.SURVEY}>Encuesta</option>
               <option value={ActivityType.WRITING_CORRECTION}>Corrección de Escritura</option>
+              <option value={ActivityType.CHATBOT}>Chatbot Experto</option>
             </select>
           </div>
 
@@ -664,6 +707,95 @@ export const GenerateActivity: React.FC = () => {
               <small style={{ color: '#666', marginTop: '0.5rem', display: 'block' }}>
                 {formData.textToCorrect.length} caracteres
               </small>
+            </div>
+          </>
+        )}
+
+        {/* Campos específicos para CHATBOT */}
+        {formData.type === ActivityType.CHATBOT && (
+          <>
+            <div style={{ marginTop: '1.5rem', marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '2px solid #1a1a2e' }}>
+              <h3>🤖 Configuración del Chatbot Experto</h3>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Tema de Especialización * </label>
+              <input
+                type="text"
+                name="chatbotTopic"
+                value={formData.chatbotTopic}
+                onChange={handleChange}
+                className="form-input"
+                required
+                placeholder="Ej: Programación en Python, Historia de México, Biología Celular..."
+              />
+              <small style={{ color: '#666', marginTop: '0.5rem', display: 'block' }}>
+                El chatbot solo responderá preguntas sobre este tema específico.
+              </small>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Personalidad *</label>
+                <select
+                  name="chatbotPersonality"
+                  value={formData.chatbotPersonality}
+                  onChange={handleChange}
+                  className="form-select"
+                  required
+                >
+                  <option value="profesional">Profesional</option>
+                  <option value="amigable">Amigable y Cercano</option>
+                  <option value="estricto">Estricto y Académico</option>
+                  <option value="motivador">Motivador</option>
+                  <option value="humoristico">Con Humor</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Nivel de Conocimiento *</label>
+                <select
+                  name="chatbotKnowledgeLevel"
+                  value={formData.chatbotKnowledgeLevel}
+                  onChange={handleChange}
+                  className="form-select"
+                  required
+                >
+                  <option value="basico">Básico - Para principiantes</option>
+                  <option value="intermedio">Intermedio</option>
+                  <option value="experto">Experto - Nivel avanzado</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Idioma del Chatbot *</label>
+                <select
+                  name="chatbotLanguage"
+                  value={formData.chatbotLanguage}
+                  onChange={handleChange}
+                  className="form-select"
+                  required
+                >
+                  <option value="Español">Español</option>
+                  <option value="English">English</option>
+                  <option value="Français">Français</option>
+                  <option value="Deutsch">Deutsch</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Instrucciones Especiales (Opcional)</label>
+              <textarea
+                name="chatbotInstructions"
+                value={formData.chatbotInstructions}
+                onChange={handleChange}
+                className="form-textarea"
+                rows={4}
+                placeholder="Añade instrucciones especiales sobre cómo debe comportarse el chatbot, qué enfoque debe tener, etc."
+              />
             </div>
           </>
         )}

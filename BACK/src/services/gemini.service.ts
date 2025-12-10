@@ -34,6 +34,22 @@ class GeminiService {
     }
   }
 
+  async chat(conversationHistory: Array<{role: string; content: string}>): Promise<string> {
+    try {
+      const model = this.client.getGenerativeModel({ model: 'gemini-pro' });
+      
+      // Convert conversation to text format for Gemini
+      const conversation = conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n\n');
+      
+      const result = await model.generateContent(conversation);
+      const response = await result.response;
+      return response.text();
+    } catch (error) {
+      logger.error('Gemini chat error:', error);
+      throw new Error('Error chatting with Gemini');
+    }
+  }
+
   private getSystemPrompt(type: string): string {
     const prompts: Record<string, string> = {
       EXAM: 'Eres un asistente educativo experto en crear exámenes. Genera contenido en formato JSON con preguntas, opciones y respuestas correctas.',

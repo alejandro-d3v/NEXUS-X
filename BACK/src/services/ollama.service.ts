@@ -37,6 +37,24 @@ class OllamaService {
     }
   }
 
+  async chat(conversationHistory: Array<{role: string; content: string}>): Promise<string> {
+    try {
+      // Use last user message
+      const lastMessage = conversationHistory[conversationHistory.length - 1];
+      
+      const response = await axios.post(`${this.baseUrl}/api/generate`, {
+        model: this.model,
+        prompt: lastMessage.content,
+        stream: false,
+      });
+
+      return response.data.response;
+    } catch (error) {
+      logger.error('Ollama chat error:', error);
+      throw new Error('Error chatting with Ollama');
+    }
+  }
+
   private getSystemPrompt(type: string): string {
     const prompts: Record<string, string> = {
       EXAM: 'Eres un asistente educativo experto en crear exámenes. Genera contenido en formato JSON con preguntas, opciones y respuestas correctas.',

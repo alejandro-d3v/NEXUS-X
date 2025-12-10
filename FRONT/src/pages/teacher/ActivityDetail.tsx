@@ -8,6 +8,7 @@ import { ExamViewer } from '../../components/ExamViewer';
 import { EmailViewer } from '../../components/EmailViewer';
 import { SurveyViewer } from '../../components/SurveyViewer';
 import { WritingCorrectionViewer } from '../../components/WritingCorrectionViewer';
+import { ChatbotInterface } from '../../components/ChatbotInterface';
 import { PlayWordSearch } from '../../components/PlayWordSearch';
 import { exportService } from '../../services/export.service';
 
@@ -143,6 +144,18 @@ export const ActivityDetail: React.FC = () => {
             return (
                 <div className="activity-content-correction">
                     <WritingCorrectionViewer content={activity.content} title={activity.title} />
+                </div>
+            );
+        }
+
+        // Handle CHATBOT type with ChatbotInterface
+        if (activity.type === 'CHATBOT') {
+            return (
+                <div className="activity-content-chatbot">
+                    <ChatbotInterface 
+                        activityId={activity.id}
+                        chatbotConfig={activity.content}
+                    />
                 </div>
             );
         }

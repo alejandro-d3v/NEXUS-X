@@ -46,6 +46,7 @@ export const TeacherLayout: React.FC = () => {
                 { path: `/teacher/generate-activity?type=${ActivityType.EMAIL}`, label: 'Generate Email' },
                 { path: `/teacher/generate-activity?type=${ActivityType.SURVEY}`, label: 'Generate Survey' },
                 { path: `/teacher/generate-activity?type=${ActivityType.WRITING_CORRECTION}`, label: 'Writing Correction' },
+                { path: `/teacher/generate-activity?type=${ActivityType.CHATBOT}`, label: 'Generate Chatbot' },
             ]
         },
         { path: '/teacher/invitations', icon: FaTicketAlt, label: 'Invitations' },

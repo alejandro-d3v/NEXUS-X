@@ -8,6 +8,7 @@ import institutionRoutes from './institution.routes';
 import gradeRoutes from './grade.routes';
 import adminRoutes from './admin.routes';
 import invitationRoutes from './invitation.routes';
+import chatRoutes from './chat.routes';
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use('/institutions', institutionRoutes);
 router.use('/grades', gradeRoutes);
 router.use('/admin', adminRoutes);
 router.use('/invitations', invitationRoutes);
+router.use('/chat', chatRoutes);
 
 export default router;

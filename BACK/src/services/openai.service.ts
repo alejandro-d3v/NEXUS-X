@@ -47,6 +47,21 @@ class OpenAIService {
     }
   }
 
+  async chat(conversationHistory: Array<{role: string; content: string}>): Promise<string> {
+    try {
+      const completion = await this.client.chat.completions.create({
+        model: 'gpt-5-nano',
+        messages: conversationHistory as any,
+        temperature: 0.7,
+      });
+
+      return completion.choices[0].message.content || 'Lo siento, no pude generar una respuesta.';
+    } catch (error) {
+      logger.error('OpenAI chat error:', error);
+      throw new Error('Error chatting with OpenAI');
+    }
+  }
+
   private buildExamPrompt(request: AIGenerationRequest): string {
     const examTemplate = require('../templates/exam.json');
     const params = request.additionalParams || {};

@@ -8,16 +8,16 @@ export const Dashboard: React.FC = () => {
   const { user } = useAuth();
 
   const tools = [
-    { type: ActivityType.EXAM, name: 'Generador de Exámenes', icon: '📝', description: 'Crea exámenes personalizados' },
-    { type: ActivityType.SUMMARY, name: 'Generador de Resúmenes', icon: '📄', description: 'Resume textos largos' },
-    { type: ActivityType.LESSON_PLAN, name: 'Plan de Lección', icon: '📚', description: 'Planifica tus clases' },
-    { type: ActivityType.QUIZ, name: 'Generador de Quiz', icon: '❓', description: 'Crea cuestionarios interactivos' },
-    { type: ActivityType.FLASHCARDS, name: 'Tarjetas de Estudio', icon: '🎴', description: 'Genera flashcards' },
-    { type: ActivityType.ESSAY, name: 'Generador de Ensayos', icon: '✍️', description: 'Ayuda con ensayos' },
-    { type: ActivityType.PRESENTATION, name: 'Presentaciones', icon: '📊', description: 'Crea presentaciones' },
-    { type: ActivityType.WORKSHEET, name: 'Hojas de Trabajo', icon: '📋', description: 'Genera ejercicios' },
-    { type: ActivityType.PROJECT, name: 'Proyectos', icon: '🎯', description: 'Planifica proyectos' },
-    { type: ActivityType.RUBRIC, name: 'Rúbricas', icon: '📏', description: 'Crea rúbricas de evaluación' },
+    { type: ActivityType.EXAM, name: 'Generador de Exámenes', icon: '📝', description: 'Crea exámenes personalizados', route: '/teacher/create-exam' },
+    { type: ActivityType.SUMMARY, name: 'Generador de Resúmenes', icon: '📄', description: 'Resume textos largos', route: '/teacher/create-summary' },
+    { type: ActivityType.LESSON_PLAN, name: 'Plan de Lección', icon: '📚', description: 'Planifica tus clases', route: '/teacher/create-lesson-plan' },
+    { type: ActivityType.QUIZ, name: 'Generador de Quiz', icon: '❓', description: 'Crea cuestionarios interactivos', route: '/teacher/create-quiz' },
+    { type: ActivityType.FLASHCARDS, name: 'Tarjetas de Estudio', icon: '🎴', description: 'Genera flashcards', route: '/teacher/create-flashcards' },
+    { type: ActivityType.ESSAY, name: 'Generador de Ensayos', icon: '✍️', description: 'Ayuda con ensayos', route: '/teacher/create-essay' },
+    { type: ActivityType.PRESENTATION, name: 'Presentaciones', icon: '📊', description: 'Crea presentaciones', route: '/teacher/create-presentation' },
+    { type: ActivityType.WORKSHEET, name: 'Hojas de Trabajo', icon: '📋', description: 'Genera ejercicios', route: '/teacher/create-worksheet' },
+    { type: ActivityType.PROJECT, name: 'Proyectos', icon: '🎯', description: 'Planifica proyectos', route: '/teacher/create-project' },
+    { type: ActivityType.RUBRIC, name: 'Rúbricas', icon: '📏', description: 'Crea rúbricas de evaluación', route: '/teacher/create-rubric' },
   ];
 
   return (
@@ -44,7 +44,7 @@ export const Dashboard: React.FC = () => {
           {tools.map((tool) => (
             <Link
               key={tool.type}
-              to={`/generate?type=${tool.type}`}
+              to={tool.route}
               style={styles.toolCard}
             >
               <div style={styles.toolIcon}>{tool.icon}</div>

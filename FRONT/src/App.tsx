@@ -25,6 +25,15 @@ import { MyGrades } from './pages/teacher/MyGrades';
 import { StudentRoster } from './pages/teacher/StudentRoster';
 import { Invitations } from './pages/teacher/Invitations';
 import { CreateSummary } from './pages/teacher/CreateSummary';
+import { CreateExam } from './pages/teacher/CreateExam';
+import { CreateQuiz } from './pages/teacher/CreateQuiz';
+import { CreateFlashcards } from './pages/teacher/CreateFlashcards';
+import { CreateLessonPlan } from './pages/teacher/CreateLessonPlan';
+import { CreateEssay } from './pages/teacher/CreateEssay';
+import { CreatePresentation } from './pages/teacher/CreatePresentation';
+import { CreateWorksheet } from './pages/teacher/CreateWorksheet';
+import { CreateProject } from './pages/teacher/CreateProject';
+import { CreateRubric } from './pages/teacher/CreateRubric';
 import { AssignActivity } from './pages/teacher/AssignActivity';
 import { MyActivities } from './pages/teacher/MyActivities';
 import { ActivityDetail } from './pages/teacher/ActivityDetail';
@@ -117,6 +126,15 @@ function App() {
             <Route path="invitations" element={<Invitations />} />
             <Route path="students" element={<StudentRoster />} />
             <Route path="create-summary" element={<CreateSummary />} />
+            <Route path="create-exam" element={<CreateExam />} />
+            <Route path="create-quiz" element={<CreateQuiz />} />
+            <Route path="create-flashcards" element={<CreateFlashcards />} />
+            <Route path="create-lesson-plan" element={<CreateLessonPlan />} />
+            <Route path="create-essay" element={<CreateEssay />} />
+            <Route path="create-presentation" element={<CreatePresentation />} />
+            <Route path="create-worksheet" element={<CreateWorksheet />} />
+            <Route path="create-project" element={<CreateProject />} />
+            <Route path="create-rubric" element={<CreateRubric />} />
             <Route path="activities/:id/assign" element={<AssignActivity />} />
             <Route path="generate-activity" element={<GenerateActivity />} />
           </Route>

@@ -117,10 +117,13 @@ export const GenerateActivity: React.FC = () => {
             parts.push('enfocándose únicamente en estilo');
           }
           parts.push(`\\nTexto a corregir:\\n${formData.textToCorrect}`);
-          parts.push('\\nProporciona:');
-          parts.push('1. Texto corregido completo');
-          parts.push('2. Lista de errores encontrados con explicaciones');
-          parts.push('3. Sugerencias de mejora');
+          parts.push('\\n\\nResponde SOLO en formato JSON con esta estructura exacta:');
+          parts.push('{');
+          parts.push('  "texto_original": "el texto original completo",');
+          parts.push('  "texto_corregido": "el texto corregido completo",');
+          parts.push('  "errores": [{"descripcion": "palabra/frase errónea", "correccion": "corrección", "explicacion": "explicación del error"}],');
+          parts.push('  "sugerencias_de_mejora": ["sugerencia 1", "sugerencia 2"]');
+          parts.push('}');
         } else {
           parts.push(`Genera un(a) ${formData.type.toLowerCase()}`);
           if (formData.subject) parts.push(`sobre ${formData.subject}`);
@@ -134,14 +137,26 @@ export const GenerateActivity: React.FC = () => {
 
       const payload: any = {
         title: formData.title,
-        description: formData.description,
         type: formData.type,
         visibility: formData.visibility,
         provider: formData.provider,
         prompt: generatedPrompt,
-        subject: formData.subject,
-        gradeLevel: formData.gradeLevel,
       };
+
+      // Only add description if it has value
+      if (formData.description) {
+        payload.description = formData.description;
+      }
+
+      // Only add subject if relevant for this activity type and has value
+      if (shouldShowSubject() && formData.subject) {
+        payload.subject = formData.subject;
+      }
+
+      // Only add gradeLevel if relevant for this activity type and has value
+      if (shouldShowGradeLevel() && formData.gradeLevel) {
+        payload.gradeLevel = formData.gradeLevel;
+      }
 
       // Agregar parámetros adicionales para exámenes
       if (formData.type === ActivityType.EXAM) {
@@ -186,6 +201,56 @@ export const GenerateActivity: React.FC = () => {
       ['cantidadPreguntas', 'cantidadOM', 'cantidadVF'].includes(e.target.name)) {
       setTimeout(validateExamQuestions, 100);
     }
+  };
+
+  // Helper functions to determine which fields to show
+  const shouldShowSubject = () => {
+    // No mostrar subject para EMAIL y WRITING_CORRECTION
+    return ![ActivityType.EMAIL, ActivityType.WRITING_CORRECTION].includes(formData.type);
+  };
+
+  const shouldShowGradeLevel = () => {
+    // Solo mostrar para actividades educativas
+    return [
+      ActivityType.EXAM,
+      ActivityType.QUIZ,
+      ActivityType.SUMMARY,
+      ActivityType.LESSON_PLAN,
+      ActivityType.FLASHCARDS,
+      ActivityType.ESSAY,
+      ActivityType.PRESENTATION,
+      ActivityType.WORKSHEET,
+      ActivityType.PROJECT,
+      ActivityType.RUBRIC,
+      ActivityType.SURVEY
+    ].includes(formData.type);
+  };
+
+  const shouldShowDuration = () => {
+    // Solo para exámenes, quizzes y presentaciones
+    return [ActivityType.EXAM, ActivityType.QUIZ, ActivityType.PRESENTATION].includes(formData.type);
+  };
+
+  const shouldShowDifficulty = () => {
+    // Para actividades académicas
+    return [
+      ActivityType.EXAM,
+      ActivityType.QUIZ,
+      ActivityType.ESSAY,
+      ActivityType.WORKSHEET,
+      ActivityType.PROJECT
+    ].includes(formData.type);
+  };
+
+  const shouldShowLanguage = () => {
+    // Para actividades que requieren especificar idioma
+    return [
+      ActivityType.EXAM,
+      ActivityType.SUMMARY,
+      ActivityType.EMAIL,
+      ActivityType.ESSAY,
+      ActivityType.WRITING_CORRECTION
+    ].includes(formData.type);
   };
 
   return (
@@ -274,71 +339,85 @@ export const GenerateActivity: React.FC = () => {
           </div>
         </div>
 
+        {/* Campos contextuales - Mostrar según tipo de actividad */}
         <div className="form-row">
-          <div className="form-group">
-            <label className="form-label">Materia</label>
-            <input
-              type="text"
-              name="subject"
-              value={formData.subject}
-              onChange={handleChange}
-              className="form-input"
-              placeholder="Ej: Matemáticas"
-            />
-          </div>
+          {shouldShowSubject() && (
+            <div className="form-group">
+              <label className="form-label">Materia {[ActivityType.EXAM, ActivityType.QUIZ, ActivityType.SURVEY].includes(formData.type) ? '*' : ''}</label>
+              <input
+                type="text"
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="Ej: Matemáticas"
+                required={[ActivityType.EXAM, ActivityType.QUIZ, ActivityType.SURVEY].includes(formData.type)}
+              />
+            </div>
+          )}
 
-          <div className="form-group">
-            <label className="form-label">Nivel Educativo</label>
-            <input
-              type="text"
-              name="gradeLevel"
-              value={formData.gradeLevel}
-              onChange={handleChange}
-              className="form-input"
-              placeholder="Ej: Secundaria"
-            />
-          </div>
+          {shouldShowGradeLevel() && (
+            <div className="form-group">
+              <label className="form-label">Nivel Educativo</label>
+              <input
+                type="text"
+                name="gradeLevel"
+                value={formData.gradeLevel}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="Ej: Secundaria"
+              />
+            </div>
+          )}
 
-          <div className="form-group">
-            <label className="form-label">Duración (minutos)</label>
-            <input
-              type="text"
-              name="duration"
-              value={formData.duration}
-              onChange={handleChange}
-              className="form-input"
-              placeholder="Ej: 60"
-            />
-          </div>
+          {shouldShowDuration() && (
+            <div className="form-group">
+              <label className="form-label">Duración (minutos)</label>
+              <input
+                type="text"
+                name="duration"
+                value={formData.duration}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="Ej: 60"
+              />
+            </div>
+          )}
         </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label className="form-label">Dificultad</label>
-            <select
-              name="difficulty"
-              value={formData.difficulty}
-              onChange={handleChange}
-              className="form-select"
-            >
-              <option value="">Seleccionar...</option>
-              <option value="Fácil">Fácil</option>
-              <option value="Medio">Medio</option>
-              <option value="Difícil">Difícil</option>
-            </select>
-          </div>
+        {(shouldShowDifficulty() || shouldShowLanguage()) && (
+          <div className="form-row">
+            {shouldShowDifficulty() && (
+              <div className="form-group">
+                <label className="form-label">Dificultad</label>
+                <select
+                  name="difficulty"
+                  value={formData.difficulty}
+                  onChange={handleChange}
+                  className="form-select"
+                >
+                  <option value="">Seleccionar...</option>
+                  <option value="Fácil">Fácil</option>
+                  <option value="Medio">Medio</option>
+                  <option value="Difícil">Difícil</option>
+                </select>
+              </div>
+            )}
 
-          <div className="form-group">
-            <label className="form-label">Idioma</label>
-            <input
-              type="text"
-              name="language"
-              value={formData.language}
-              onChange={handleChange}
-              className="form-input"
-            />
+            {shouldShowLanguage() && (
+              <div className="form-group">
+                <label className="form-label">Idioma</label>
+                <input
+                  type="text"
+                  name="language"
+                  value={formData.language}
+                  onChange={handleChange}
+                  className="form-input"
+                />
+              </div>
+            )}
           </div>
-        </div>
+        )}
 
         {/* Campos específicos para EXÁMENES */}
         {formData.type === ActivityType.EXAM && (

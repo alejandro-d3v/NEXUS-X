@@ -16,41 +16,68 @@ export const WritingCorrectionViewer: React.FC<WritingCorrectionViewerProps> = (
         }
     }
 
-    const originalText = correctionData.originalText || correctionData.textoOriginal || '';
-    const correctedText = correctionData.correctedText || correctionData.textoCorregido || '';
-    const errors = correctionData.errors || correctionData.errores || [];
-    const suggestions = correctionData.suggestions || correctionData.sugerencias || [];
-    const statistics = correctionData.statistics || correctionData.estadisticas || {};
+    const originalText = correctionData.originalText || 
+                         correctionData.textoOriginal || 
+                         correctionData.texto_original || 
+                         correctionData.original_text ||
+                         '(Texto original no disponible)';
+    const correctedText = correctionData.correctedText || 
+                          correctionData.textoCorregido || 
+                          correctionData.texto_corregido || 
+                          correctionData.corrected_text ||
+                          '';
+    const errors = correctionData.errors || 
+                   correctionData.errores || 
+                   correctionData.errores_encontrados ||
+                   [];
+    const suggestions = correctionData.suggestions || 
+                        correctionData.sugerencias || 
+                        correctionData.sugerencias_de_mejora ||
+                        correctionData.sugerencias_mejora ||
+                        [];
+    const statistics = correctionData.statistics || 
+                       correctionData.estadisticas || 
+                       {};
 
-    const getErrorTypeIcon = (type: string) => {
+    const getErrorTypeIcon = (type: string | undefined) => {
+        if (!type) return '📌';
         switch (type.toLowerCase()) {
             case 'spelling':
             case 'ortografia':
+            case 'ortografía':
+            case 'ortografía y acentuación':
                 return '✏️';
             case 'grammar':
             case 'gramatica':
+            case 'gramática':
                 return '📝';
             case 'style':
             case 'estilo':
                 return '🎨';
             case 'punctuation':
             case 'puntuacion':
+            case 'puntuación':
                 return '❗';
             default:
                 return '📌';
         }
     };
 
-    const getErrorTypeName = (type: string) => {
+    const getErrorTypeName = (type: string | undefined) => {
+        if (!type) return 'Error';
         const types: { [key: string]: string } = {
             'spelling': 'Ortografía',
             'ortografia': 'Ortografía',
+            'ortografía': 'Ortografía',
+            'ortografía y acentuación': 'Ortografía y Acentuación',
             'grammar': 'Gramática',
             'gramatica': 'Gramática',
+            'gramática': 'Gramática',
             'style': 'Estilo',
             'estilo': 'Estilo',
             'punctuation': 'Puntuación',
-            'puntuacion': 'Puntuación'
+            'puntuacion': 'Puntuación',
+            'puntuación': 'Puntuación'
         };
         return types[type.toLowerCase()] || type;
     };
@@ -123,11 +150,11 @@ export const WritingCorrectionViewer: React.FC<WritingCorrectionViewerProps> = (
                                 <div className="error-details">
                                     <div className="error-change">
                                         <span className="error-original">
-                                            {error.original || error.textoOriginal}
+                                            {error.original || error.textoOriginal || error.descripcion || 'N/A'}
                                         </span>
                                         <span className="arrow">→</span>
                                         <span className="error-corrected">
-                                            {error.corrected || error.correccion}
+                                            {error.corrected || error.correccion || error.correction || 'N/A'}
                                         </span>
                                     </div>
                                     {(error.explanation || error.explicacion) && (

@@ -36,8 +36,8 @@ export const generateActivitySchema = Joi.object({
     'WORKSHEET',
     'PROJECT'
   ).required(),
-  subject: Joi.string().required(),
-  gradeLevel: Joi.string().optional(), // Changed from 'grade' to 'gradeLevel' and made optional
+  subject: Joi.string().allow('').optional(), // Allow empty for activities that don't need it
+  gradeLevel: Joi.string().allow('').optional(), // Allow empty strings
   title: Joi.string().optional(),
   description: Joi.string().optional(),
   visibility: Joi.string().valid('PRIVATE', 'PUBLIC').optional(),

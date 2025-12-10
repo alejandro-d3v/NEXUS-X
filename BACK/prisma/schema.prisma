@@ -72,7 +72,7 @@ model Activity {
   type        ActivityType
   visibility  ActivityVisibility @default(PRIVATE)
   content     Json
-  subject     String
+  subject     String?            // Optional - not all activities need a subject (e.g., EMAIL, WRITING_CORRECTION)
   gradeLevel  String?            // Educational level metadata (e.g., "Secundaria", "Primaria")
   aiProvider  AIProvider
   creditCost  Int
